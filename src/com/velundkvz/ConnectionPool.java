@@ -38,14 +38,9 @@ public class ConnectionPool
         }
     }
 
-    public synchronized ConnectionPool getInstance()
+    public static synchronized ConnectionPool getInstance(String role_name, String password, int maxConnections)
     {
-        if (newInstances < maxPoolInstances)
-        {
-            ++newInstances;
-            return new ConnectionPool(name, pswd, maxConnections);
-        }
-        throw new IllegalStateException(MAX_NEW_INSTANCES_REACHED_FORMAT_MSG.formatted(MAX_COMPANY_POOL_INSTANCES));
+            return new ConnectionPool(role_name, password, maxConnections);
     }
 
     private void setInfo(String user, String password)

@@ -24,4 +24,15 @@ public enum DBConnections
     {
         return newInstances;
     }
+
+    public ConnectionPool getPool()
+    {
+        if (newInstances < maxPoolInstances)
+        {
+            ++newInstances;
+            return ConnectionPool.getInstance(name, pswd, maxConnections);
+        }
+        throw new IllegalStateException(MAX_NEW_INSTANCES_REACHED_FORMAT_MSG.formatted(MAX_COMPANY_POOL_INSTANCES));
+
+    }
 }

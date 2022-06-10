@@ -26,12 +26,12 @@ public enum DBConnections
         this.maxPoolInstances = maxPoolInstances;
         this.maxConnections = maxConnections;
     }
-    public synchronized ConnectionPool getInstance()
+    public synchronized ConnectionPoolImpl getInstance()
     {
         if (newInstances < maxPoolInstances)
         {
             ++newInstances;
-            return new ConnectionPool(name, pswd, maxConnections);
+            return new ConnectionPoolImpl(name, pswd, maxConnections);
         }
         throw new IllegalStateException(MAX_NEW_INSTANCES_REACHED_FORMAT_MSG.formatted(MAX_COMPANY_POOL_INSTANCES));
     }
@@ -39,12 +39,12 @@ public enum DBConnections
     {
         return newInstances;
     }
-    public static class ConnectionPool
+    private static final class ConnectionPoolImpl implements ConnectionPool
     {
         private static Properties info;
         private final BlockingQueue<Connection> queue;
 
-        private ConnectionPool(String roleName, String password, int maxConnections)
+        private ConnectionPoolImpl(String roleName, String password, int maxConnections)
         {
             int failedConnections = 0;
             queue = new LinkedBlockingDeque<>();

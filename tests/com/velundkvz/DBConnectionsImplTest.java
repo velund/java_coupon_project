@@ -12,26 +12,16 @@ class DBConnectionsImplTest
     @DisplayName("when create pool:")
     public class WhenCreatePool
     {
-       /* @Test
+        @Test
         @DisplayName("once, then not throwing IllegalStateException")
         public void whenCreatePoolOnceThenNotThrowsIllegalStateException()
         {
-            assertDoesNotThrow(ConnectionPool::getInstance);
+            assertAll
+            (
+                ()-> assertDoesNotThrow(()->{DBConnections.CLIENT_CONNECTIONS.getPool();}),
+                ()-> assertDoesNotThrow(()->{DBConnections.ADMIN_CONNECTIONS.getPool();}),
+                ()-> assertDoesNotThrow(()->{DBConnections.COMPANY_CONNECTIONS.getPool();})
+            );
         }
-        @Test
-        @DisplayName("then self created counter increments")
-        public void whenCreatePoolThenReferenceCounterIncrements()
-        {
-            assertEquals(1, ConnectionPool.getNewReferencesCounter());
-        }
-        @Test
-        @DisplayName("twice, then throwing IllegalStateException")
-        public void whenCreatePoolTwiceThenThrowIllegalStateException()
-        {
-            IllegalStateException thrown = assertThrows(IllegalStateException.class, ConnectionPool::getInstance);
-            assertEquals("maximum 1 instance of company pool allowed", thrown.getMessage());
-        }*/
     }
-
-
 }

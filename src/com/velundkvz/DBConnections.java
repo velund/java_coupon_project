@@ -4,59 +4,94 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import static definitions.ConnectionDefinitions.*;
 
 public enum DBConnections
 {
-    COMPANY_CONNECTIONS(COMPANY_USER, PASSWORD, MAX_COMPANY_POOL_INSTANCES, MAX_COMPANY_CONNECTIONS),
-    CLIENT_CONNECTIONS(CLIENT_USER,PASSWORD, MAX_CLIENT_POOL_INSTANCES, MAX_CLIENT_CONNECTIONS),
-    ADMIN_CONNECTIONS(ADMIN_USER, PASSWORD,MAX_ADMIN_POOL_INSTANCES, MAX_ADMIN_CONNECTIONS);
-    private final int maxPoolInstances;
-    private final int maxConnections;
-    public final String name;
-    public final String pswd;
-    private int newInstances = 0;
-    DBConnections(String role_name, String password, int maxPoolInstances, int maxConnections)
+    COMPANY_CONNECTIONS(CONNECTION_OF.COMPANY),
+    CLIENT_CONNECTIONS(CONNECTION_OF.CLIENT),
+    ADMIN_CONNECTIONS(CONNECTION_OF.ADMIN);
+    private CONNECTION_OF connectionOf;
+    private ConnectionPool connectionPool;
+
+    DBConnections(CONNECTION_OF ct)
     {
-        name = role_name;
-        pswd = password;
-        this.maxPoolInstances = maxPoolInstances;
-        this.maxConnections = maxConnections;
+        this.connectionOf = ct;
     }
-    public synchronized ConnectionPoolImpl getInstance()
+    public synchronized ConnectionPool getPool()
     {
-        if (newInstances < maxPoolInstances)
+        if (connectionPool == null)
         {
-            ++newInstances;
-            return new ConnectionPoolImpl(name, pswd, maxConnections);
+            connectionPool = new ConnectionPoolImpl(connectionOf);
         }
-        throw new IllegalStateException(MAX_NEW_INSTANCES_REACHED_FORMAT_MSG.formatted(MAX_COMPANY_POOL_INSTANCES));
+        return connectionPool;
     }
-    public int getNewInstancesCounter()
+
+    public synchronized void destroyPool()
     {
-        return newInstances;
+        connectionPool.closeAllConnections();
+        connectionPool = null;
+        System.gc();
     }
+
+    private enum CONNECTION_OF
+    {
+        COMPANY(COMPANY_USER, PASSWORD, MAX_COMPANY_CONNECTIONS),
+        CLIENT(CLIENT_USER,PASSWORD, MAX_CLIENT_CONNECTIONS),
+        ADMIN(ADMIN_USER, PASSWORD, MAX_ADMIN_CONNECTIONS);
+        private final int maxConnections;
+        private final String name;
+        private final String pswd;
+        private Properties info;
+
+        CONNECTION_OF(String name, String pswd, int maxConnections)
+        {
+            this.maxConnections = maxConnections;
+            this.name = name;
+            this.pswd = pswd;
+        }
+
+        private Connection createConnection() throws SQLException
+        {
+            setInfo(name, pswd);
+            Connection c =  DriverManager.getConnection(URL, info);
+            c.setClientInfo(info);
+            return c;
+        }
+        private void setInfo(String user, String password)
+        {
+            info = new Properties();
+            info.put("user", user);
+            info.put("password", password);
+            info.put("databaseName", DB);
+        }
+
+    }
+
     private static final class ConnectionPoolImpl implements ConnectionPool
     {
-        private static Properties info;
+        CONNECTION_OF connectionOf;
         private final BlockingQueue<Connection> queue;
 
-        private ConnectionPoolImpl(String roleName, String password, int maxConnections)
+        public ConnectionPoolImpl(CONNECTION_OF ct)
         {
+            this.connectionOf = ct;
             int failedConnections = 0;
-            queue = new LinkedBlockingDeque<>();
-            setInfo(roleName, password);
-            for (int i = 0; i < maxConnections; ++i)
+            queue = new ArrayBlockingQueue<>(ct.maxConnections);
+
+            for (int i = 0; i < ct.maxConnections; ++i)
             {
                 try
                 {
-                    queue.add(DriverManager.getConnection(URL, info));
+                    queue.add(ct.createConnection());
                 } catch (SQLException e)
                 {
-                    System.err.printf((CONNECTION_FAILED_FORMAT_MSG) + "%n", roleName);
+                    System.err.printf((CONNECTION_FAILED_FORMAT_MSG) + "%n", ct.name);
                     e.printStackTrace();
                     ++failedConnections;
                 }
@@ -67,11 +102,76 @@ public enum DBConnections
             }
         }
 
-        private void setInfo(String user, String password)
+        @Override
+        public synchronized Connection getConnection()
         {
-            info = new Properties();
-            info.put("user", user);
-            info.put("password", password);
+            try
+            {
+                return queue.take();
+            } catch (InterruptedException e)
+            {
+                e.printStackTrace();
+                throw new RuntimeException(GET_CONNECTION_INTERRUPTED_MSG);
+            }
+        }
+        @Override
+        public void put(Connection connection)
+        {
+            try
+            {
+                queue.put(connection);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+                throw new RuntimeException();
+            }
+        }
+        @Override
+        public synchronized void putWithValidation(Connection connection)
+        {
+            try
+            {
+                if (isValidconn(connection))
+                {
+                    queue.add(connection);
+                    return;
+                }else
+                {
+                    System.err.println("connection not added");
+                }
+            }catch (SQLException e )
+            {
+                e.printStackTrace();
+            }
+        }
+
+        private boolean isValidconn(Connection connection) throws SQLException
+        {
+            return  !connection.isClosed() &&
+                    connection.getClientInfo("user").equals(connectionOf.name) &&
+                    connection.getClientInfo("password").equals(connectionOf.pswd) &&
+                    connection.getClientInfo("databaseName").equals(DB);
+        }
+
+        public synchronized void closeAllConnections()
+        {
+            Connection c;
+            try
+            {
+                while (  (c = queue.poll(TIME_OUT_TO_POLL_WHEN_CLOSE_CONNECTIONS, TimeUnit.SECONDS))  != null )
+                {
+                    try
+                    {
+                        c.close();
+                    } catch (SQLException e)
+                    {
+                        System.err.println(CLOSE_CONNECTION_EXC_MSG);
+                    }
+                }
+            }catch (InterruptedException e)
+            {
+                System.err.println(INTERRUPTED_DURING_CLOSE_ALL_CONNECTIONS_MSG);
+            }
         }
     }
 }

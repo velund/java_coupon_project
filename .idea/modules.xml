@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/connection_pool.iml" filepath="$PROJECT_DIR$/connection_pool.iml" />
+      <module fileurl="file://$PROJECT_DIR$/coupon_system.iml" filepath="$PROJECT_DIR$/coupon_system.iml" />
     </modules>
   </component>
 </project>

@@ -1,4 +1,4 @@
-package definitions;
+package com.velundkvz.definitions;
 
 public final class ConnectionDefinitions
 {
@@ -14,7 +14,7 @@ public final class ConnectionDefinitions
     public static final String PORT  = "3306";
     public static final String DB  = "coupon_system";
     public static final String URL = "jdbc:mysql://localhost:" + PORT;
-    public static final int TIME_OUT_TO_POLL_WHEN_CLOSE_CONNECTIONS = 3;
+    public static final int WAIT_WHEN_CLOSE_CONNECTIONS = 1;
 
     public static final String CONNECTION_FAILED_FORMAT_MSG = "failed to connect to db as %s";
 
@@ -23,6 +23,9 @@ public final class ConnectionDefinitions
     public static final String GET_CONNECTION_INTERRUPTED_MSG = "interrupted while waiting to get connection from pool";
     public static final String INTERRUPTED_DURING_CLOSE_ALL_CONNECTIONS_MSG = "interrupted during close all connetctions";
     public static final String CLOSE_CONNECTION_EXC_MSG = "problem occurred while closing one of pool connections";
+    public static final String POOL_NOT_EXISTS_EXC_MSG = "pool not exists";
+    public static final String CONNECTION_NOT_ADDED_MSG = "connection not added";
+    public static final String NOT_APPROPRIATE_CONNECTION_TYPE = "tried to put not appropriate connection type for this pool";
 
     private ConnectionDefinitions()
     {

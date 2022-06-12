@@ -1,4 +1,7 @@
-package com.velundkvz;
+package com.velundkvz.common.connection_pool;
+
+import com.velundkvz.common.connection_pool.ConnectionPool;
+import com.velundkvz.common.connection_pool.DBConnections;
 
 import java.sql.Connection;
 
@@ -13,5 +16,9 @@ public class Main {
         Connection a = adminConnPool.getConnection();
         companyConnPool.putWithValidation(c);
         companyConnPool.putWithValidation(a);
+        DBConnections.COMPANY_CONNECTIONS.destroyPool();
+        Connection d = companyConnPool.getConnection();
+
+
     }
 }

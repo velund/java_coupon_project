@@ -1,45 +1,56 @@
-package com.velundkvz;
+package com.velundkvz.common.connection_pool;
+
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
-import static definitions.ConnectionDefinitions.*;
+import static com.velundkvz.definitions.ConnectionDefinitions.*;
+
+import com.velundkvz.common.connection_pool.ConnectionPool;
+import com.velundkvz.exceptions.BadTypeConnectionException;
+import com.velundkvz.exceptions.PoolNotExistsException;
 
 public enum DBConnections
 {
-    COMPANY_CONNECTIONS(CONNECTION_OF.COMPANY),
-    CLIENT_CONNECTIONS(CONNECTION_OF.CLIENT),
-    ADMIN_CONNECTIONS(CONNECTION_OF.ADMIN);
-    private CONNECTION_OF connectionOf;
-    private ConnectionPool connectionPool;
+    COMPANY_CONNECTIONS(CONNECTION_TYPE.COMPANY),
+    CLIENT_CONNECTIONS(CONNECTION_TYPE.CLIENT),
+    ADMIN_CONNECTIONS(CONNECTION_TYPE.ADMIN);
 
-    DBConnections(CONNECTION_OF ct)
+    private CONNECTION_TYPE connectionType;
+    private ConnectionPoolImpl connectionPool;
+
+    DBConnections(CONNECTION_TYPE ct)
     {
-        this.connectionOf = ct;
+        this.connectionType = ct;
     }
     public synchronized ConnectionPool getPool()
     {
         if (connectionPool == null)
         {
-            connectionPool = new ConnectionPoolImpl(connectionOf);
+            connectionPool = new ConnectionPoolImpl(connectionType);
         }
         return connectionPool;
     }
 
     public synchronized void destroyPool()
     {
+        if ( connectionPool == null )
+        {
+            return;
+        }
         connectionPool.closeAllConnections();
+        connectionPool.queue = null;
         connectionPool = null;
         System.gc();
     }
 
-    private enum CONNECTION_OF
+    private enum CONNECTION_TYPE
     {
         COMPANY(COMPANY_USER, PASSWORD, MAX_COMPANY_CONNECTIONS),
         CLIENT(CLIENT_USER,PASSWORD, MAX_CLIENT_CONNECTIONS),
@@ -49,7 +60,7 @@ public enum DBConnections
         private final String pswd;
         private Properties info;
 
-        CONNECTION_OF(String name, String pswd, int maxConnections)
+        CONNECTION_TYPE(String name, String pswd, int maxConnections)
         {
             this.maxConnections = maxConnections;
             this.name = name;
@@ -75,36 +86,40 @@ public enum DBConnections
 
     private static final class ConnectionPoolImpl implements ConnectionPool
     {
-        CONNECTION_OF connectionOf;
-        private final BlockingQueue<Connection> queue;
+        CONNECTION_TYPE connectionType;
+        private BlockingQueue<Connection> queue;
 
-        public ConnectionPoolImpl(CONNECTION_OF ct)
+        public ConnectionPoolImpl(CONNECTION_TYPE connectionType)
         {
-            this.connectionOf = ct;
+            this.connectionType = connectionType;
             int failedConnections = 0;
-            queue = new ArrayBlockingQueue<>(ct.maxConnections);
+            queue = new LinkedBlockingDeque<>(connectionType.maxConnections);
 
-            for (int i = 0; i < ct.maxConnections; ++i)
+            for (int i = 0; i < connectionType.maxConnections; ++i)
             {
                 try
                 {
-                    queue.add(ct.createConnection());
+                    queue.add(connectionType.createConnection());
                 } catch (SQLException e)
                 {
-                    System.err.printf((CONNECTION_FAILED_FORMAT_MSG) + "%n", ct.name);
+                    System.err.printf((CONNECTION_FAILED_FORMAT_MSG) + "%n", connectionType.name);
                     e.printStackTrace();
                     ++failedConnections;
                 }
             }
             if (failedConnections != 0)
             {
-                System.err.printf((NUM_OF_ACTIVE_CONNECTIONS_FORMAT_MSG) + "%n", MAX_COMPANY_CONNECTIONS - failedConnections);
+                System.err.printf((NUM_OF_ACTIVE_CONNECTIONS_FORMAT_MSG) + "%n", connectionType.maxConnections - failedConnections);
             }
         }
 
         @Override
         public synchronized Connection getConnection()
         {
+            if ( queue == null )
+            {
+                throw new PoolNotExistsException(POOL_NOT_EXISTS_EXC_MSG);
+            }
             try
             {
                 return queue.take();
@@ -115,8 +130,12 @@ public enum DBConnections
             }
         }
         @Override
-        public void put(Connection connection)
+        public synchronized void put(Connection connection)
         {
+            if ( queue == null )
+            {
+                throw new PoolNotExistsException(POOL_NOT_EXISTS_EXC_MSG);
+            }
             try
             {
                 queue.put(connection);
@@ -129,36 +148,36 @@ public enum DBConnections
         @Override
         public synchronized void putWithValidation(Connection connection)
         {
+            if ( queue == null )
+            {
+                throw new PoolNotExistsException(POOL_NOT_EXISTS_EXC_MSG);
+            }
             try
             {
                 if (isValidconn(connection))
                 {
-                    queue.add(connection);
-                    return;
+                    queue.put(connection);
                 }else
                 {
-                    System.err.println("connection not added");
+                    System.err.println(CONNECTION_NOT_ADDED_MSG);
+                    throw new BadTypeConnectionException(NOT_APPROPRIATE_CONNECTION_TYPE);
                 }
-            }catch (SQLException e )
+            }catch (SQLException | InterruptedException e )
             {
                 e.printStackTrace();
             }
         }
 
-        private boolean isValidconn(Connection connection) throws SQLException
-        {
-            return  !connection.isClosed() &&
-                    connection.getClientInfo("user").equals(connectionOf.name) &&
-                    connection.getClientInfo("password").equals(connectionOf.pswd) &&
-                    connection.getClientInfo("databaseName").equals(DB);
-        }
-
         public synchronized void closeAllConnections()
         {
+            if ( queue == null )
+            {
+                throw new PoolNotExistsException(POOL_NOT_EXISTS_EXC_MSG);
+            }
             Connection c;
             try
             {
-                while (  (c = queue.poll(TIME_OUT_TO_POLL_WHEN_CLOSE_CONNECTIONS, TimeUnit.SECONDS))  != null )
+                while ( (c = queue.poll(WAIT_WHEN_CLOSE_CONNECTIONS, TimeUnit.SECONDS))  != null )
                 {
                     try
                     {
@@ -172,6 +191,33 @@ public enum DBConnections
             {
                 System.err.println(INTERRUPTED_DURING_CLOSE_ALL_CONNECTIONS_MSG);
             }
+        }
+
+        public synchronized int validConnections()
+        {
+            int valids = 0;
+            for (Connection c : queue)
+            {
+                try
+                {
+                    if ( c.isValid(0) )
+                    {
+                        ++valids;
+                    }
+                } catch (SQLException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            return valids;
+        }
+
+        private boolean isValidconn(Connection connection) throws SQLException
+        {
+            return  !connection.isClosed() &&
+                    connection.getClientInfo("user").equals(connectionType.name) &&
+                    connection.getClientInfo("password").equals(connectionType.pswd) &&
+                    connection.getClientInfo("databaseName").equals(DB);
         }
     }
 }

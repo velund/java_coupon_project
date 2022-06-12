@@ -1,4 +1,4 @@
-package com.velundkvz;
+package com.velundkvz.common.connection_pool;
 
 import java.sql.Connection;
 
@@ -8,4 +8,5 @@ public interface ConnectionPool
     Connection getConnection();
     void put(Connection connection);
     void putWithValidation(Connection connection);
+    int validConnections();
 }

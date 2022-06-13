@@ -1,6 +1,6 @@
 package com.velundkvz.definitions.schema;
 
-public class CouponTbl
+public final class CouponTbl
 {
     public static final String COL_ID = "id";
     public static final String COL_COMPANY_ID = "company_id";
@@ -12,5 +12,10 @@ public class CouponTbl
     public static final String COL_AMOUNT = "amount";
     public static final String COL_DESCRIPTION = "description";
     public static final String COL_IMAGE_URL = "image_url";
+
+    private CouponTbl()
+    {
+        throw new AssertionError("constants container not for implementing");
+    }
 
 }

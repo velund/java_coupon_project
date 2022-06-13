@@ -1,7 +1,6 @@
 package com.velundkvz.common.connection_pool;
 
-import com.velundkvz.common.connection_pool.ConnectionPool;
-import com.velundkvz.common.connection_pool.DBConnections;
+import com.velundkvz.data.model.Coupon;
 
 import java.sql.Connection;
 
@@ -18,6 +17,8 @@ public class Main {
         companyConnPool.putWithValidation(a);
         DBConnections.COMPANY_CONNECTIONS.destroyPool();
         Connection d = companyConnPool.getConnection();
+
+        Coupon cup = new Coupon.CouponBuilder().build();
 
 
     }

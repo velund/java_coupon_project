@@ -29,6 +29,6 @@ public final class ConnectionDefinitions
 
     private ConnectionDefinitions()
     {
-
+        throw new AssertionError("constants container not for implementing");
     }
 }

@@ -215,8 +215,7 @@ public enum DBConnections
         {
             return  !connection.isClosed() &&
                     connection.getClientInfo("user").equals(connectionType.name) &&
-                    connection.getClientInfo("password").equals(connectionType.pswd) &&
-                    connection.getClientInfo("databaseName").equals(DB);
+                    connection.getClientInfo("password").equals(connectionType.pswd);
         }
     }
 }

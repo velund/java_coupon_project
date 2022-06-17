@@ -2,7 +2,7 @@ package com.velundkvz.data.database.dao;
 
 import com.velundkvz.common.connection_pool.ConnectionPool;
 import com.velundkvz.common.connection_pool.DBConnections;
-import com.velundkvz.definitions.schema.model.Customer;
+import com.velundkvz.data.model.Customer;
 import com.velundkvz.exceptions.NotExistingCouponOrCustomerException;
 
 import java.sql.Connection;

@@ -1,7 +1,6 @@
 package com.velundkvz.data.database.dao;
 
 import com.velundkvz.exceptions.NotExistingCouponOrCustomerException;
-import com.velundkvz.exceptions.NotExistingCustomerException;
 import org.junit.jupiter.api.*;
 
 import java.sql.*;
@@ -15,7 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static com.velundkvz.definitions.ConnectionDefinitions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.velundkvz.definitions.schema.model.Customer;
+import com.velundkvz.data.model.Customer;
 import static com.velundkvz.data.DefaultModels.*;
 
 class CustomerMySQLDAOTest

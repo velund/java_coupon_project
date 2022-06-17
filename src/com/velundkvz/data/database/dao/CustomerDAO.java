@@ -1,6 +1,6 @@
 package com.velundkvz.data.database.dao;
 
-import com.velundkvz.definitions.schema.model.Customer;
+import com.velundkvz.data.model.Customer;
 
 import java.util.List;
 import java.util.Optional;

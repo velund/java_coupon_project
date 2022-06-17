@@ -1,11 +1,11 @@
 package com.velundkvz.data;
 
-import com.velundkvz.definitions.schema.model.Company;
-import com.velundkvz.definitions.schema.model.Company.CompanyBuilder;
-import com.velundkvz.definitions.schema.model.Coupon;
-import com.velundkvz.definitions.schema.model.Coupon.CouponBuilder;
-import com.velundkvz.definitions.schema.model.Customer;
-import com.velundkvz.definitions.schema.model.Customer.CustomerBuilder;
+import com.velundkvz.data.model.Company;
+import com.velundkvz.data.model.Company.CompanyBuilder;
+import com.velundkvz.data.model.Coupon;
+import com.velundkvz.data.model.Coupon.CouponBuilder;
+import com.velundkvz.data.model.Customer;
+import com.velundkvz.data.model.Customer.CustomerBuilder;
 
 public class DefaultModels
 {

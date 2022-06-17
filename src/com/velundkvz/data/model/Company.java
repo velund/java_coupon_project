@@ -1,4 +1,4 @@
-package com.velundkvz.definitions.schema.model;
+package com.velundkvz.data.model;
 
 import com.velundkvz.exceptions.InvalidCompanyBuildException;
 import com.velundkvz.exceptions.InvalidCompanyParametersException;

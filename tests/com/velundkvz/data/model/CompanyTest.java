@@ -1,6 +1,5 @@
 package com.velundkvz.data.model;
 
-import com.velundkvz.definitions.schema.model.Company;
 import com.velundkvz.exceptions.InvalidCompanyBuildException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.velundkvz.definitions.schema.model;
+package com.velundkvz.data.model;
 
 import java.net.URL;
 import java.util.Date;

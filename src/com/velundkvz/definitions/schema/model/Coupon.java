@@ -1,4 +1,4 @@
-package com.velundkvz.data.model;
+package com.velundkvz.definitions.schema.model;
 
 import java.net.URL;
 import java.util.Date;
@@ -15,7 +15,7 @@ public class Coupon
 {
     private long id;
     private long company_id;
-    private  String category;
+    private int category;
     private String title;
     private long price;
     private Date start_date;
@@ -81,7 +81,7 @@ public class Coupon
     {
         private long id;
         private long company_id;
-        private  String category;
+        private  int category;
         private String title;
         private long price;
         Date start_date;
@@ -100,7 +100,7 @@ public class Coupon
             this.company_id = company_id;
             return this;
         }
-        public CouponBuilder category(String category)
+        public CouponBuilder category(int category)
         {
             this.category = category;
             return this;
@@ -164,7 +164,7 @@ public class Coupon
         return company_id;
     }
 
-    public String getCategory() {
+    public int getCategory() {
         return category;
     }
 

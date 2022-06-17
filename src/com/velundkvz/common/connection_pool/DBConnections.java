@@ -70,7 +70,7 @@ public enum DBConnections
         private Connection createConnection() throws SQLException
         {
             setInfo(name, pswd);
-            Connection c =  DriverManager.getConnection(URL, info);
+            Connection c =  DriverManager.getConnection(URL + "/" + DB, info);
             c.setClientInfo(info);
             return c;
         }
@@ -79,7 +79,6 @@ public enum DBConnections
             info = new Properties();
             info.put("user", user);
             info.put("password", password);
-            info.put("databaseName", DB);
         }
 
     }

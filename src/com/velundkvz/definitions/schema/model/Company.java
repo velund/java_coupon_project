@@ -1,4 +1,4 @@
-package com.velundkvz.data.model;
+package com.velundkvz.definitions.schema.model;
 
 import com.velundkvz.exceptions.InvalidCompanyBuildException;
 import com.velundkvz.exceptions.InvalidCompanyParametersException;
@@ -33,7 +33,7 @@ public class Company
         }
     }
 
-    static class CompanyBuilder
+    public static class CompanyBuilder
     {
         private long id;
         private String name;

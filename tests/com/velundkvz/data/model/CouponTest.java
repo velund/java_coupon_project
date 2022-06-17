@@ -1,5 +1,6 @@
 package com.velundkvz.data.model;
 
+import com.velundkvz.definitions.schema.model.Coupon;
 import com.velundkvz.exceptions.InvalidCouponBuildException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class CouponTest
         (
                 ()->assertEquals(0, c.getId()),
                 ()->assertEquals(0, c.getCompany_id()),
-                ()->assertEquals(null, c.getCategory()),
+                ()->assertEquals(0, c.getCategory()),
                 ()->assertEquals(0, c.getPrice()),
                 ()->assertEquals(null, c.getTitle()),
                 ()->assertEquals(null, c.getStart_date()),

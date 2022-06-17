@@ -1,24 +1,25 @@
 package com.velundkvz.common.connection_pool;
 
-import com.velundkvz.data.model.Coupon;
-
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.util.Properties;
+
+import static com.velundkvz.definitions.ConnectionDefinitions.DB;
+import static com.velundkvz.definitions.ConnectionDefinitions.URL;
 
 public class Main {
 
     public static void main(String[] args) throws Exception
     {
-        ConnectionPool companyConnPool = DBConnections.COMPANY_CONNECTIONS.getPool();
         ConnectionPool clientConnPool = DBConnections.CLIENT_CONNECTIONS.getPool();
-        ConnectionPool adminConnPool = DBConnections.ADMIN_CONNECTIONS.getPool();
-        Connection c = companyConnPool.getConnection();
-        Connection a = adminConnPool.getConnection();
-        companyConnPool.putWithValidation(c);
-        companyConnPool.putWithValidation(a);
-        DBConnections.COMPANY_CONNECTIONS.destroyPool();
-        Connection d = companyConnPool.getConnection();
+        Properties properties = new Properties();
+        properties.put("user", "krill_admin");
+        properties.put("password", "15kvz61982!");
+        Connection c =DriverManager.getConnection(URL + "/" + DB, properties);
+        PreparedStatement ps = c.prepareStatement("drop table if exists t");
+         ps.executeUpdate();
 
-        Coupon cup = new Coupon.CouponBuilder().build();
 
 
     }

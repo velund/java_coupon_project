@@ -1,4 +1,4 @@
-package com.velundkvz.data.model;
+package com.velundkvz.definitions.schema.model;
 
 import com.velundkvz.exceptions.InvalidCustomerBuildException;
 import com.velundkvz.exceptions.InvalidCustomerParametersException;

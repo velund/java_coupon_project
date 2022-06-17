@@ -1,5 +1,6 @@
 package com.velundkvz.data.model;
 
+import com.velundkvz.definitions.schema.model.Customer;
 import com.velundkvz.exceptions.InvalidCustomerBuildException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

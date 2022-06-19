@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface CustomerDAO
 {
-    void create(Customer customer);
+    void add(Customer customer);
     boolean remove(long id);
     boolean updateEmail(long id, String email);
     Optional<Customer> findById(long id);

@@ -20,17 +20,12 @@ public class CustomerMySQLDAO implements CustomerDAO
     private static final ConnectionPool clientCP = DBConnections.CLIENT_CONNECTIONS.getPool();
 
     @Override
-    public synchronized void create(Customer customer)
+    public synchronized void add(Customer customer)
     {
         Connection connection = clientCP.getConnection();
         try
         {
-            PreparedStatement ps = connection.prepareStatement(INSERT_SQL);
-            ps.setString(1, customer.getFirst_name());
-            ps.setString(2, customer.getLast_name());
-            ps.setString(3, customer.getEmail());
-            ps.setString(4, customer.getPassword());
-            ps.executeUpdate();
+            prepareCustomerInsertStmt( customer, connection ).executeUpdate();
         } catch (SQLException e)
         {
             e.printStackTrace();
@@ -38,24 +33,22 @@ public class CustomerMySQLDAO implements CustomerDAO
         {
             clientCP.put(connection);
         }
-
     }
+
     @Override
     public synchronized boolean remove(long id)
     {
         Connection connection = clientCP.getConnection();
         try
         {
-            PreparedStatement ps = connection.prepareStatement(DELETE_SQL);
-            ps.setLong(1, id);
-            if ( ps.executeUpdate() != 0)
+            if ( prepareCustomerRemoveStmt( id, connection ).executeUpdate() != 0)
             {
                 return true;
             }
         } catch (Exception e)
         {
             e.printStackTrace();
-        } finally
+        }finally
         {
             clientCP.put(connection);
         }
@@ -68,17 +61,14 @@ public class CustomerMySQLDAO implements CustomerDAO
         Connection connection = clientCP.getConnection();
         try
         {
-            PreparedStatement ps = connection.prepareStatement(UPDATE_EMAIL_BY_ID_SQL);
-            ps.setString(1, email);
-            ps.setLong(2, id);
-            if ( ps.executeUpdate() != 0)
+            if ( prepareUpdateEmailStatement(id, email, connection).executeUpdate() != 0)
             {
                 return true;
             }
         } catch (Exception e)
         {
             e.printStackTrace();
-        } finally
+        }finally
         {
             clientCP.put(connection);
         }
@@ -91,9 +81,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         Connection connection = clientCP.getConnection();
         try
         {
-            PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID_SQL);
-            ps.setLong(1, id);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = prepareFindByIDStmt(id, connection).executeQuery();
             if ( rs.next() )
             {
                 return Optional.of(createCustomerByFull(rs));
@@ -101,7 +89,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         } catch (Exception e)
         {
             e.printStackTrace();
-        } finally
+        }finally
         {
             clientCP.put(connection);
         }
@@ -114,10 +102,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         Connection connection = clientCP.getConnection();
         try
         {
-            PreparedStatement ps = connection.prepareStatement(SELECT_BY_EMAIL_AND_PSWD_SQL);
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = prepareFindByEmailAndPswdStmt(email, password, connection).executeQuery();
             if ( rs.next() )
             {
                 return Optional.of(createCustomerByFull(rs));
@@ -125,7 +110,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         } catch (Exception e)
         {
             e.printStackTrace();
-        } finally
+        }finally
         {
             clientCP.put(connection);
         }
@@ -138,8 +123,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         Connection connection = clientCP.getConnection();
         try
         {
-            PreparedStatement ps = connection.prepareStatement(COUNT_CUSTOMER_SQL);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = prepareCountStmt(connection).executeQuery();
             if ( rs.next() )
             {
                 return rs.getLong(1);
@@ -161,8 +145,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         Connection connection = clientCP.getConnection();
         try
         {
-            PreparedStatement ps = connection.prepareStatement(GET_CUSTOMER_MAX_ID_SQL);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = prepareGetMaxIdStmt( connection).executeQuery();
             if ( rs.next() )
             {
                 return rs.getLong(1);
@@ -185,9 +168,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         List<Customer> custs = new ArrayList<>();
         try
         {
-            PreparedStatement ps = connection.prepareStatement(SELECT_ALL_SQL);
-
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = prepareGetAllStmt( connection).executeQuery();
             while ( rs.next() )
             {
                 custs.add(createCustomerByFull(rs));
@@ -231,6 +212,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         }
         return false;
     }
+    /* PRIVATE */
     private Customer createCustomerByFull(ResultSet rs) throws SQLException
     {
         return new Customer.CustomerBuilder()
@@ -241,4 +223,65 @@ public class CustomerMySQLDAO implements CustomerDAO
                 .password(rs.getString(5))
                 .build();
     }
+    private PreparedStatement initPreparedStmt(String sql, Connection connection)
+    {
+        PreparedStatement ps = null;
+        try
+        {
+            ps = connection.prepareStatement(sql);
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return ps;
+    }
+    private PreparedStatement prepareCustomerInsertStmt(Customer customer, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(INSERT_CUSTOMER_SQL, connection);
+        ps.setString(1, customer.getFirst_name());
+        ps.setString(2, customer.getLast_name());
+        ps.setString(3, customer.getEmail());
+        ps.setString(4, customer.getPassword());
+        return ps;
+    }
+    private PreparedStatement prepareCustomerRemoveStmt(long id, Connection connection) throws  SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(DELETE_SQL, connection);
+        ps.setLong(1, id);
+        return ps;
+    }
+    private PreparedStatement prepareCountStmt(Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(COUNT_CUSTOMER_SQL, connection);
+        return ps;
+    }
+    private PreparedStatement prepareFindByEmailAndPswdStmt(String email, String password, Connection connection) throws  SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(SELECT_BY_EMAIL_AND_PSWD_SQL, connection);
+        ps.setString(1, email);
+        ps.setString(2, password);
+        return ps;
+    }
+    private PreparedStatement prepareFindByIDStmt(long id, Connection connection) throws  SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(SELECT_BY_ID_SQL, connection);
+        ps.setLong(1, id);
+        return ps;
+    }
+    private PreparedStatement prepareUpdateEmailStatement(long id, String email, Connection connection) throws  SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(UPDATE_EMAIL_BY_ID_SQL, connection);
+        ps.setString(1, email);
+        ps.setLong(2, id);
+        return ps;
+    }
+    private PreparedStatement prepareGetMaxIdStmt( Connection connection)
+    {
+        return initPreparedStmt(GET_CUSTOMER_MAX_ID_SQL, connection);
+    }
+    private PreparedStatement prepareGetAllStmt(Connection connection)
+    {
+        return initPreparedStmt(SELECT_ALL_SQL, connection);
+    }
+
 }

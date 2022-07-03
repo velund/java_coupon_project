@@ -21,8 +21,6 @@ public final class customerTbl
     public static final String GET_CUSTOMER_MAX_ID_SQL = "select max(" + COL_ID + ")" + " from " +  CUSTOMER_TBL;
     public static final String INSERT_INTO_COUPON_CUSTOMER_TBL_SQL = "insert into " + COUPON_CUSTOMER_ID_TBL + " values " + "(?,?)";
 
-    public static final int ER_NO_REFERENCED_ROW_FOREIGN_KEY_CONSTRAINT = 1216;
-
     private customerTbl()
     {
         throw new AssertionError("constants container not for implementing");

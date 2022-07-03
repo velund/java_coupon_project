@@ -3,7 +3,6 @@ package com.velundkvz.data.database.dao;
 import com.velundkvz.common.connection_pool.ConnectionPool;
 import com.velundkvz.common.connection_pool.DBConnections;
 import com.velundkvz.data.model.Customer;
-import com.velundkvz.exceptions.NotExistingCouponOrCustomerException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -84,7 +83,7 @@ public class CustomerMySQLDAO implements CustomerDAO
             ResultSet rs = prepareFindByIDStmt(id, connection).executeQuery();
             if ( rs.next() )
             {
-                return Optional.of(createCustomerByFull(rs));
+                return Optional.of(createCustomerByFullParameters(rs));
             }
         } catch (Exception e)
         {
@@ -105,7 +104,7 @@ public class CustomerMySQLDAO implements CustomerDAO
             ResultSet rs = prepareFindByEmailAndPswdStmt(email, password, connection).executeQuery();
             if ( rs.next() )
             {
-                return Optional.of(createCustomerByFull(rs));
+                return Optional.of(createCustomerByFullParameters(rs));
             }
         } catch (Exception e)
         {
@@ -168,10 +167,10 @@ public class CustomerMySQLDAO implements CustomerDAO
         List<Customer> custs = new ArrayList<>();
         try
         {
-            ResultSet rs = prepareGetAllStmt( connection).executeQuery();
+            ResultSet rs = prepareGetAllCustomersStmt( connection).executeQuery();
             while ( rs.next() )
             {
-                custs.add(createCustomerByFull(rs));
+                custs.add(createCustomerByFullParameters(rs));
             }
         } catch (Exception e)
         {
@@ -198,13 +197,7 @@ public class CustomerMySQLDAO implements CustomerDAO
             }
         } catch (SQLException e)
         {
-            if (e.getErrorCode() == ER_NO_REFERENCED_ROW_FOREIGN_KEY_CONSTRAINT)
-            {
-                throw new NotExistingCouponOrCustomerException();
-            }else
-            {
-                e.printStackTrace();
-            }
+            e.printStackTrace();
             return false;
         } finally
         {
@@ -213,7 +206,7 @@ public class CustomerMySQLDAO implements CustomerDAO
         return false;
     }
     /* PRIVATE */
-    private Customer createCustomerByFull(ResultSet rs) throws SQLException
+    private Customer createCustomerByFullParameters(ResultSet rs) throws SQLException
     {
         return new Customer.CustomerBuilder()
                 .id(rs.getLong(1))
@@ -238,10 +231,14 @@ public class CustomerMySQLDAO implements CustomerDAO
     private PreparedStatement prepareCustomerInsertStmt(Customer customer, Connection connection) throws SQLException
     {
         PreparedStatement ps = initPreparedStmt(INSERT_CUSTOMER_SQL, connection);
-        ps.setString(1, customer.getFirst_name());
-        ps.setString(2, customer.getLast_name());
-        ps.setString(3, customer.getEmail());
-        ps.setString(4, customer.getPassword());
+        try {
+            ps.setString(1, customer.getFirst_name());
+            ps.setString(2, customer.getLast_name());
+            ps.setString(3, customer.getEmail());
+            ps.setString(4, customer.getPassword());
+        } catch (SQLException e) {
+            throw new SQLException("bad parameters, "  + e.getMessage());
+        }
         return ps;
     }
     private PreparedStatement prepareCustomerRemoveStmt(long id, Connection connection) throws  SQLException
@@ -279,7 +276,7 @@ public class CustomerMySQLDAO implements CustomerDAO
     {
         return initPreparedStmt(GET_CUSTOMER_MAX_ID_SQL, connection);
     }
-    private PreparedStatement prepareGetAllStmt(Connection connection)
+    private PreparedStatement prepareGetAllCustomersStmt(Connection connection)
     {
         return initPreparedStmt(SELECT_ALL_SQL, connection);
     }

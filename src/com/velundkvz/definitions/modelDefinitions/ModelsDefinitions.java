@@ -2,6 +2,7 @@ package com.velundkvz.definitions.modelDefinitions;
 
 public final class ModelsDefinitions
 {
+    public static final byte UNKNOWN_ID = -1;
     public static final String INVALID_ID_EXC_MSG = "invalid id";
     public static final String INVALID_COUPON_COMPANY_ID_EXC_MSG = "invalid company id";
     public static final String INVALID_COUPON_AMOUNT_EXC_MSG = "invalid amount";

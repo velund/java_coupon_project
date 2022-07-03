@@ -1,15 +1,12 @@
 package com.velundkvz.data.model;
 
 import java.net.URL;
-import java.util.Date;
+import java.sql.Date;
 
 import com.velundkvz.exceptions.InvalidCouponBuildException;
 import com.velundkvz.exceptions.InvalidCouponParametersException;
 
-import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.INVALID_ID_EXC_MSG;
-import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.INVALID_COUPON_COMPANY_ID_EXC_MSG;
-import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.INVALID_COUPON_AMOUNT_EXC_MSG;
-import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.INVALID_COUPON_PRICE_EXC_MSG;
+import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.*;
 
 public class Coupon
 {
@@ -24,7 +21,21 @@ public class Coupon
     private String description;
     private URL image_url;
 
-    public Coupon(CouponBuilder cb) {
+    public Coupon(Coupon coupon)
+    {
+        this.id = coupon.getId();
+        this.company_id = coupon.getCompany_id();
+        this.category = coupon.getCategory();
+        this.title = coupon.getTitle();
+        this.price = coupon.getPrice();
+        this.start_date = coupon.getStart_date();
+        this.end_date = coupon.getEnd_date();
+        this.amount = coupon.getAmount();
+        this.description = coupon.getDescription();
+        this.image_url = coupon.getImage_url();
+    }
+
+    private Coupon(CouponBuilder cb) {
         this.id = cb.id;
         this.company_id = cb.company_id;
         this.category = cb.category;
@@ -77,6 +88,20 @@ public class Coupon
         }
     }
 
+    public void setId(long id)
+    {
+        if (id <= 0 )
+        {
+            this.id = UNKNOWN_ID;
+        }
+        this.id = id;
+    }
+
+    public void setCompany_id(long company_id)
+    {
+        this.company_id = company_id;
+    }
+
     public static class CouponBuilder
     {
         private long id;
@@ -84,11 +109,11 @@ public class Coupon
         private  int category;
         private String title;
         private long price;
-        Date start_date;
-        Date end_date;
-        int amount;
-        String description;
-        URL image_url;
+        private Date start_date;
+        private Date end_date;
+        private int amount;
+        private String description;
+        private URL image_url;
         public CouponBuilder(){}
         public CouponBuilder id(long id)
         {

@@ -2,10 +2,13 @@ package com.velundkvz.data.database.dao;
 
 import com.velundkvz.data.test_utils.Utils;
 import static com.velundkvz.data.test_utils.Utils.*;
-import com.velundkvz.exceptions.NotExistingCouponOrCustomerException;
+
+import com.velundkvz.exceptions.ErrorCode;
 import com.velundkvz.data.model.Customer;
 import static com.velundkvz.data.DefaultModels.*;
 
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,18 +34,18 @@ class CustomerMySQLDAOTest
         resetAllTables();
     }
     @Test
-    @DisplayName("when call create then does not throw any exception")
-    public void whenCallCreateThenDoesNotThrowAnyException()
+    @DisplayName("when call add then does not throw any exception")
+    public void whenCallAddThenDoesNotThrowAnyException()
     {
-        assertDoesNotThrow( ()-> new CustomerMySQLDAO().add(cust) );
+        assertDoesNotThrow( ()-> new CustomerMySQLDAO().add(test_dflt_cust) );
     }
     @Test
-    @DisplayName("when Call Create One Entry Added On Customer Tbl and index incremented")
-    public void whenCallCreateOneEntryAddedOnCustomerTbl()
+    @DisplayName("when Call add One Entry Added On Customer Tbl and index incremented")
+    public void whenCallAddOneEntryAddedOnCustomerTbl()
     {
         long lastId = getMaxIdCust();
         long lastCount = countCustTbl();
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
         long newtId = getMaxIdCust();
         long newCount = countCustTbl();
         assertAll
@@ -63,14 +66,14 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call remove not existing id from Customer Tbl then return false")
     public void whenCallRemoveNotExistingIdFromCustomerTblThenReturnFalse()
     {
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
         assertFalse( custDAO.remove(2) );
     }
     @Test
     @DisplayName("when Call remove existing id from Customer Tbl then return true")
     public void whenCallRemoveExistingIdFromCustomerTblThenReturnTrue()
     {
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
         long id = getMaxIdCust();
         assertTrue(id != 0);
         assertTrue( custDAO.remove( id ) );
@@ -79,8 +82,8 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call remove existing id from Customer Tbl then Count Decrements")
     public void whenCallRemoveExistingIdFromCustomerTblThenCountDecrements()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         long lastCount = countCustTbl();
         long id = getMaxIdCust();
         assertTrue(lastCount != 0);
@@ -92,8 +95,8 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call remove existing id from Customer Tbl twice then Return False")
     public void whenCallRemoveExistingIdFromCustomerTblTwiceThenReturnFalse()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         custDAO.remove(1);
         assertFalse(custDAO.remove(1));
     }
@@ -101,8 +104,8 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call update email existing id from Customer Tbl then Return True")
     public void whenCallUpdateEmailExistingIdFromCustomerTblTrue()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         assertAll
         (
                 ()->assertFalse(isEmailExistsCustTbl("new-Email.com")),
@@ -115,8 +118,8 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call update email not existing id from Customer Tbl then Return False")
     public void whenCallUpdateEmailNotExistingIdFromCustomerTblFalse()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         assertAll
         (
             ()-> assertFalse(isEmailExistsCustTbl("new-Email.com")),
@@ -129,8 +132,8 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call Find By Id Existing From Customer Tbl then Return Optional Not Empty, contains the correct data")
     public void whenCallFindByIdExistingFromCustomerTblThenReturnOptionalNotEmpty()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         Optional<Customer> optcust = custDAO.findById(2);
         assertAll
         (
@@ -151,8 +154,8 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call Find By Id Not Existing From Customer Tbl then Return Optional Empty")
     public void whenCallFindByIdNotExistingFromCustomerTblThenReturnOptionalEmpty()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         assertFalse(isIdExistsCustTbl(3));
         Optional<Customer> optcust = custDAO.findById(3);
         assertAll
@@ -166,8 +169,8 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call Find By Email And Pswd Existing From Customer Tbl then Return Optional Not Empty, contains the correct data")
     public void whenCallFindByEmailAndPswdExistingFromCustomerTblThenReturnOptionalNotEmpty()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         Optional<Customer> optcust = custDAO.findByEmailAndPassword(email_cust, pswd_cust);
         assertAll
                 (
@@ -187,8 +190,8 @@ class CustomerMySQLDAOTest
     @DisplayName("when Call Find By email and pswd Not Existing From Customer Tbl then Return Optional Empty")
     public void whenCallFindByEmailAndPswdNotExistingFromCustomerTblThenReturnOptionalEmpty()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         Optional<Customer> optcust = custDAO.findByEmailAndPassword("XXXXXX", "XXXXXX");
         assertAll
                 (
@@ -209,7 +212,7 @@ class CustomerMySQLDAOTest
     {
         for (int j = 0; j < i; j++)
         {
-            custDAO.add(cust);
+            custDAO.add(test_dflt_cust);
         }
         assertAll
         (
@@ -224,7 +227,7 @@ class CustomerMySQLDAOTest
     {
         for (int j = 0; j < i; j++)
         {
-            custDAO.add(cust);
+            custDAO.add(test_dflt_cust);
         }
         assertEquals(i, custDAO.count());
     }
@@ -235,7 +238,7 @@ class CustomerMySQLDAOTest
     {
         for (int j = 0; j < i; j++)
         {
-            custDAO.add(cust);
+            custDAO.add(test_dflt_cust);
         }
         assertEquals(i, custDAO.getMaxId());
     }
@@ -244,40 +247,40 @@ class CustomerMySQLDAOTest
     public void whengetMAxIdAfterRemovesAndAddsThenReturnCorrectOr0IfEmpty()
     {
         assertEquals(0, custDAO.getMaxId());
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
         assertEquals(1, custDAO.getMaxId());
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
         assertEquals(2, custDAO.getMaxId());
         custDAO.remove(2);
         assertEquals(1, custDAO.getMaxId());
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         assertEquals(4, custDAO.getMaxId());
     }
     @Test
     @DisplayName("when purchase then added one correct entry in couponId_customerId table")
     public void whenPurchaseThenAddedOneCorrectEntryInCouponId_customerIdTable()
     {
-        custDAO.add(cust);
-        custDAO.add(cust);
+        custDAO.add(test_dflt_cust);
+        custDAO.add(test_dflt_cust);
         Utils.insertCompanyToCompanyTbl();
-        Utils.insertCouponToCouponTbl(getMaxIdcompany());
+        Utils.insertNotExpiredCouponToCouponTbl(getMaxIdcompany());
         assertTrue( custDAO.purchase(getMaxIdCoupon(), getMaxIdCust()) );
         assertEquals(1, countCouponCustTbl());
     }
 
     @Test
-    @DisplayName("when purchase not existing customer ID then throw NotExistingCustomerException")
+    @DisplayName("when purchase not existing customer ID then purchase returns false")
     public void whenPurchaseNotExistingCustomerIDThenThrowNotExistingCustomerException()
     {
-        assertThrows(NotExistingCouponOrCustomerException.class, ()->custDAO.purchase(1, 1));
+        assertFalse( custDAO.purchase(1, 1));
     }
     @Test
-    @DisplayName("when purchase not existing coupon ID then throw NotExistingCouponException")
+    @DisplayName("when purchase not existing coupon ID then throw SQLIntegrityConstraintViolationException")
     public void whenPurchaseNotExistingCouponIDThenThrowNotNotExistingCouponException()
     {
-        custDAO.add(cust);
-        assertThrows(NotExistingCouponOrCustomerException.class, ()->custDAO.purchase(1, 1));
+        custDAO.add(test_dflt_cust);
+        assertFalse( custDAO.purchase(1, 1));
     }
 
 

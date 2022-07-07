@@ -1,11 +1,18 @@
 package com.velundkvz.data.test_utils;
 
+import com.velundkvz.data.model.Company;
+
 import java.sql.*;
+import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 import static com.velundkvz.data.DefaultModels.*;
 import static com.velundkvz.definitions.ConnectionDefinitions.DB;
 import static com.velundkvz.definitions.ConnectionDefinitions.URL;
+import static com.velundkvz.definitions.schema.CompanyTbl.*;
+import static com.velundkvz.definitions.schema.DBSchema.COMPANY_TBL;
+import static com.velundkvz.definitions.schema.DBSchema.COUPON_TBL;
 
 public class Utils
 {
@@ -41,7 +48,7 @@ public class Utils
     }
     public static void fill2EntriesCouponIdCustomerIdRelations()
     {
-        insertCompanyToCompanyTbl();
+        insertDfltCompanyToCompanyTbl();
         for (int i = 0; i < 3; i++)
         {
             insertNotExpiredCouponToCouponTbl(getMaxIdcompany());
@@ -107,13 +114,22 @@ public class Utils
 
     }
 
-    public static void insertCompanyToCompanyTbl()
+    public static void insertDfltCompanyToCompanyTbl()
+    {
+        insertCompanyToCompanyTbl(test_dflt_company.getName(), test_dflt_company.getPassword(), test_dflt_company.getEmail());
+    }
+    public static void insertCompanyToCompanyTbl(Company company)
+    {
+        insertCompanyToCompanyTbl(company.getName(), company.getPassword(), company.getEmail());
+    }
+    public static void insertCompanyToCompanyTbl(String name, String pass, String email)
     {
         try
         {
-            PreparedStatement ps = adminConnection.prepareStatement("insert into company(name, password) values(?,?)");
-            ps.setString(1, test_dflt_company.getName());
-            ps.setString(2, test_dflt_company.getPassword());
+            PreparedStatement ps = adminConnection.prepareStatement("insert into company(" + COL_NAME + "," + COL_PASSWORD + "," + COL_E_MAIL + ") values(?,?,?)");
+            ps.setString(1, name);
+            ps.setString(2, pass);
+            ps.setString(3, email);
             ps.executeUpdate();
         } catch (SQLException e)
         {
@@ -157,7 +173,7 @@ public class Utils
         long id = 0;
         try
         {
-            ResultSet rs =  adminConnection.prepareStatement("select max(id) from coupon").executeQuery();
+            ResultSet rs =  adminConnection.prepareStatement("select max(id) from " + COUPON_TBL).executeQuery();
             if (rs.next())
             {
                 id = rs.getInt(1);
@@ -168,6 +184,78 @@ public class Utils
             id = -1;
         }
         return id;
+    }
+    public static long getMaxIdCompany()
+    {
+        long id = 0;
+        try
+        {
+            ResultSet rs =  adminConnection.prepareStatement("select max(id) from " + COMPANY_TBL).executeQuery();
+            if (rs.next())
+            {
+                id = rs.getInt(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            id = -1;
+        }
+        return id;
+    }
+    public static long countCompanies()
+    {
+        long count = 0;
+        try
+        {
+            ResultSet rs =  adminConnection.prepareStatement("select count(*) from " + COMPANY_TBL).executeQuery();
+            if (rs.next())
+            {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            count = -1;
+        }
+        return count;
+    }
+    public static boolean isCompanyIDExists(long id)
+    {
+        boolean isExists = false;
+        try
+        {
+            PreparedStatement ps =  adminConnection.prepareStatement("select exists (select " + COL_ID + " from " + COMPANY_TBL + " where " + COL_ID + " = ?)" );
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+            {
+                isExists = rs.getBoolean(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        return isExists;
+    }
+    public static boolean isCompanyEMAILExists(String email)
+    {
+        boolean isExists = false;
+        try
+        {
+            PreparedStatement ps =  adminConnection.prepareStatement("select exists (select " + COL_E_MAIL + " from " + COMPANY_TBL + " where " + COL_E_MAIL + " = ?)" );
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+            {
+                isExists = rs.getBoolean(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        return isExists;
     }
     public static long getMinIdCoupon()
     {
@@ -292,7 +380,7 @@ public class Utils
     }
     public static void fillNotExpiredCoupons(int n)
     {
-        insertCompanyToCompanyTbl();
+        insertDfltCompanyToCompanyTbl();
         for (int i = 0; i < 3; i++)
         {
             insertNotExpiredCouponToCouponTbl(getMaxIdcompany());
@@ -300,10 +388,35 @@ public class Utils
     }
     public static void fillExpiredCoupons(int n)
     {
-        insertCompanyToCompanyTbl();
+        insertDfltCompanyToCompanyTbl();
         for (int i = 0; i < 3; i++)
         {
             insertExpiredCouponToCouponTbl(getMaxIdcompany());
         }
     }
+    public static void fillDefaultCompanies(int n)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            insertDfltCompanyToCompanyTbl();
+        }
+    }
+    public static boolean containsAllCompanies(List<Company> origin, List<Company> comparingList )
+    {
+        for (Company compFromComparingList: comparingList)
+        {
+            if (origin.stream().noneMatch(compFromOrigList -> areEqualByEverythingExceptId(compFromOrigList, compFromComparingList) ))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    public static boolean areEqualByEverythingExceptId(Company c1, Company c2)
+    {
+        return Objects.equals(c1.getName(), c2.getName()) &&
+                Objects.equals(c1.getEmail(), c2.getEmail()) &&
+                Objects.equals(c1.getPassword(), c2.getPassword());
+    }
+
 }

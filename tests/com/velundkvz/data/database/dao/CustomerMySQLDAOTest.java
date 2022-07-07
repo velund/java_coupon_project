@@ -3,12 +3,9 @@ package com.velundkvz.data.database.dao;
 import com.velundkvz.data.test_utils.Utils;
 import static com.velundkvz.data.test_utils.Utils.*;
 
-import com.velundkvz.exceptions.ErrorCode;
 import com.velundkvz.data.model.Customer;
 import static com.velundkvz.data.DefaultModels.*;
 
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -263,7 +260,7 @@ class CustomerMySQLDAOTest
     {
         custDAO.add(test_dflt_cust);
         custDAO.add(test_dflt_cust);
-        Utils.insertCompanyToCompanyTbl();
+        Utils.insertDfltCompanyToCompanyTbl();
         Utils.insertNotExpiredCouponToCouponTbl(getMaxIdcompany());
         assertTrue( custDAO.purchase(getMaxIdCoupon(), getMaxIdCust()) );
         assertEquals(1, countCouponCustTbl());

@@ -21,9 +21,9 @@ public class DefaultModels
     public static final String email_cust = "default_mail.com";
     public static final String pswd_cust = "default_pswd";
 
-    public static final String name_comp = "default_name";
-    public static final String email_comp = "default_mail.com";
-    public static final String pswd_comp = "default_pswd";
+    public static final String dflt_name_comp = "default_name";
+    public static final String dflt_email_comp = "default_mail.com";
+    public static final String dflt_pswd_comp = "default_pswd";
 
     public static final int category = 111;
     public static final String title = "default_title";
@@ -68,9 +68,9 @@ public class DefaultModels
     private static void createCompany()
     {
         test_dflt_company = new CompanyBuilder()
-                .first_name(name_comp)
-                .email(email_comp)
-                .password(pswd_comp)
+                .name(dflt_name_comp)
+                .email(dflt_email_comp)
+                .password(dflt_pswd_comp)
                 .build();
     }
     private static void createCustomer()

@@ -38,7 +38,7 @@ class CouponMySQLDAOTest {
         @DisplayName("Then Does Not Throw Any Exception")
         public void ThenDoesNotThrowAnyException()
         {
-            Utils.insertCompanyToCompanyTbl();
+            Utils.insertDfltCompanyToCompanyTbl();
             test_dflt_not_expired_coupon.setCompany_id(getMaxIdcompany());
             assertDoesNotThrow( ()-> couponDAO.add(test_dflt_not_expired_coupon) );
         }
@@ -47,7 +47,7 @@ class CouponMySQLDAOTest {
         @DisplayName("Then One Entry Added On coupon Tbl and index incremented")
         public void ThenOneEntryAddedOnCouponTbl()
         {
-            Utils.insertCompanyToCompanyTbl();
+            Utils.insertDfltCompanyToCompanyTbl();
             long lastId = getMaxIdCoupon();
             long lastCount = countCouponTbl();
             test_dflt_not_expired_coupon.setCompany_id(getMaxIdcompany());
@@ -67,7 +67,7 @@ class CouponMySQLDAOTest {
         @DisplayName("Then correct coupon returned")
         public void AddedOnCouponTbl()
         {
-            Utils.insertCompanyToCompanyTbl();
+            Utils.insertDfltCompanyToCompanyTbl();
             long lastCompanyId = getMaxIdcompany();
             test_dflt_not_expired_coupon.setCompany_id(lastCompanyId);
             Coupon returnedCoupon = couponDAO.add(test_dflt_not_expired_coupon);
@@ -103,7 +103,7 @@ class CouponMySQLDAOTest {
         {
             for (int i = 0; i < 3; i++)
             {
-                Utils.insertCompanyToCompanyTbl();
+                Utils.insertDfltCompanyToCompanyTbl();
                 test_dflt_not_expired_coupon.setCompany_id(getMaxIdcompany());
                 couponDAO.add(test_dflt_not_expired_coupon);
             }

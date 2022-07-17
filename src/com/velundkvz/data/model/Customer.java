@@ -3,6 +3,8 @@ package com.velundkvz.data.model;
 import com.velundkvz.exceptions.InvalidCustomerBuildException;
 import com.velundkvz.exceptions.InvalidCustomerParametersException;
 
+import java.util.List;
+
 import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.INVALID_ID_EXC_MSG;
 
 public class Customer
@@ -12,6 +14,7 @@ public class Customer
     private String last_name;
     private String email;
     private String password;
+    private List<Coupon> coupons;
     public Customer(CustomerBuilder cb)
     {
         this.id = cb.id;
@@ -34,6 +37,11 @@ public class Customer
         }
     }
 
+    public void setCoupons(List<Coupon> allCustomerCoupons)
+    {
+        coupons = allCustomerCoupons;
+    }
+
     public static class CustomerBuilder
     {
         private long id;
@@ -43,6 +51,9 @@ public class Customer
         private String password;
 
         public CustomerBuilder(){}
+
+
+
         public CustomerBuilder id(long id)
         {
             this.id = id;
@@ -78,6 +89,11 @@ public class Customer
             }
             return customer;
         }
+    }
+
+    public List<Coupon> getCoupons()
+    {
+        return coupons;
     }
 
     public long getId() {

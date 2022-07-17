@@ -10,7 +10,10 @@ public interface CustomerDAO
     void add(Customer customer);
     boolean remove(long id);
     boolean updateEmail(long id, String email);
+    boolean updatePassword(long id, String password);
     Optional<Customer> findById(long id);
+    boolean isExists(String email);
+    boolean isExists(long customerId);
     List<Customer> getAll();
     boolean purchase(long couponId, long customerId);
     Optional<Customer> findByEmailAndPassword(String email, String password);

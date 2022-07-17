@@ -74,7 +74,25 @@ public class CustomerMySQLDAO implements CustomerDAO
         }
         return false;
     }
-
+    @Override
+    public boolean updatePassword(long id, String password)
+    {
+        Connection connection = clientCP.getConnection();
+        try
+        {
+            if ( prepareUpdateCustomerPasswordStatement(id, password, connection).executeUpdate() != 0)
+            {
+                return true;
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }finally
+        {
+            clientCP.put(connection);
+        }
+        return false;
+    }
     @Override
     public Optional<Customer> findById(long id)
     {
@@ -94,6 +112,28 @@ public class CustomerMySQLDAO implements CustomerDAO
             clientCP.put(connection);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public boolean isExists(String email)
+    {
+        Connection connection = clientCP.getConnection();
+        try
+        {
+            ResultSet rs = prepareIsCustomerEmailExistsStmt(email, connection).executeQuery();
+            if ( rs.next() )
+            {
+                return true;
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }finally
+        {
+            clientCP.put(connection);
+        }
+        return false;
     }
 
     @Override
@@ -206,6 +246,35 @@ public class CustomerMySQLDAO implements CustomerDAO
         }
         return false;
     }
+
+    public boolean isExists(long customerId)
+    {
+        Connection connection = clientCP.getConnection();
+        try
+        {
+            ResultSet rs = prepareIsCUstomerExistsByIDStmt(customerId, connection).executeQuery();
+            if ( rs.next() )
+            {
+                return rs.getInt(1) == 1;
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }finally
+        {
+            clientCP.put(connection);
+        }
+        return false;
+    }
+
+    private PreparedStatement prepareIsCUstomerExistsByIDStmt(long customerId, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(IS_CUSTOMER_EXISTS_BY_ID_SQL, connection);
+        ps.setLong(1, customerId);
+        return ps;
+    }
+
     /* PRIVATE */
     private Customer createCustomerByFullParameters(ResultSet rs) throws SQLException
     {
@@ -266,6 +335,12 @@ public class CustomerMySQLDAO implements CustomerDAO
         ps.setLong(1, id);
         return ps;
     }
+    private PreparedStatement prepareIsCustomerEmailExistsStmt(String email, Connection connection) throws  SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(SELECT_CUSTOMER_BY_EMAIL_SQL, connection);
+        ps.setString(1, email);
+        return ps;
+    }
     private PreparedStatement prepareUpdateCustomerEmailStatement(long id, String email, Connection connection) throws  SQLException
     {
         PreparedStatement ps = initPreparedStmt(UPDATE_CUSTOMER_EMAIL_BY_ID_SQL, connection);
@@ -273,6 +348,14 @@ public class CustomerMySQLDAO implements CustomerDAO
         ps.setLong(2, id);
         return ps;
     }
+    private PreparedStatement prepareUpdateCustomerPasswordStatement(long id, String password, Connection connection) throws  SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(UPDATE_CUSTOMER_PASSWORD_BY_ID_SQL, connection);
+        ps.setString(1, password);
+        ps.setLong(2, id);
+        return ps;
+    }
+
     private PreparedStatement prepareGetCustomerMaxIdStmt(Connection connection)
     {
         return initPreparedStmt(GET_CUSTOMER_MAX_ID_SQL, connection);

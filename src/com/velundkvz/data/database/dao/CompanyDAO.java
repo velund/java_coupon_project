@@ -1,7 +1,6 @@
 package com.velundkvz.data.database.dao;
 
 import com.velundkvz.data.model.Company;
-import com.velundkvz.data.model.Customer;
 
 import java.util.List;
 import java.util.Optional;

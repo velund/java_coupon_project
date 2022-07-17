@@ -3,9 +3,12 @@ package com.velundkvz.data.database.dao;
 import com.velundkvz.data.model.Coupon;
 import com.velundkvz.data.test_utils.Utils;
 
+import static com.velundkvz.data.DefaultModels.dflt_coupon_amount;
 import static com.velundkvz.data.DefaultModels.test_dflt_not_expired_coupon;
 import static com.velundkvz.data.test_utils.Utils.*;
 
+import com.velundkvz.exceptions.CouponNotExistsInDBException;
+import com.velundkvz.exceptions.CustomerNotExistsInDBException;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
@@ -163,6 +166,78 @@ class CouponMySQLDAOTest {
             assertEquals(3, returnedList.size());
         }
     }
+    @Nested
+    @DisplayName("when Call getAmount(): ")
+    class WhenCallGetAmount
+    {
+        @Test
+        @DisplayName("if id not exists in empty table, throws CouponNotExistsInDBException")
+        public void ifidNotExistsInEmptyTblThrowsCouponNotExistsInDBException()
+        {
+            assertThrows(CouponNotExistsInDBException.class, ()->couponDAO.getAmount(1));
+        }
+        @Test
+        @DisplayName("if id not exists in not empty table, throws CouponNotExistsInDBException")
+        public void ifidNotExistsInNotEmptyTblThrowsCouponNotExistsInDBException()
+        {
+            insertDfltCompanyToCompanyTbl();
+            insertNotExpiredCouponToCouponTbl(1);
+            assertAll
+            (
+                ()->assertEquals(1, countCouponTbl()),
+                ()->assertThrows(CouponNotExistsInDBException.class, ()->couponDAO.getAmount(2))
+            );
+        }
+        @Test
+        @DisplayName("if exists, with dflt amount, returns dflt amount")
+        public void ifExistsWithDfltCouponAmountReturnsDefaultAmount()
+        {
+            insertDfltCompanyToCompanyTbl();
+            insertNotExpiredCouponToCouponTbl(1);
+            assertEquals(dflt_coupon_amount, couponDAO.getAmount(1));
+        }
+    }
+    @Nested
+    @DisplayName("when Call isCouponOwned(couponId, customerId): ")
+    class WhenCallIsCouponOwned
+    {
+        @Test
+        @DisplayName("if no such coupon id, throws CouponNotExistsInDBException")
+        public void ifNoSuchCouponIdThrowsCouponNotExistsInDBException()
+        {
+            insertDfltCustomerToCustomerTbl();
+            assertThrows(CouponNotExistsInDBException.class, ()->couponDAO.isCouponOwned(1,1));
+        }
+        @Test
+        @DisplayName("if no such customer id, throws CustomerNotExistsInDBException")
+        public void ifNoSuchCustomerIdThrowsCustomerNotExistsInDBException()
+        {
+            insertDfltCompanyToCompanyTbl();
+            insertNotExpiredCouponToCouponTbl(1);
+            assertThrows(CustomerNotExistsInDBException.class, ()->couponDAO.isCouponOwned(1,1));
+        }
+        @Test
+        @DisplayName("if such coupon owned, returns true")
+        public void ifSuchCouponOwnedReturnsTrue()
+        {
+            insertDfltCompanyToCompanyTbl();
+            insertNotExpiredCouponToCouponTbl(1);
+            insertDfltCustomerToCustomerTbl();
+            insertCouponToCustomerId_CouponIdTbl(1, 1);
+            assertTrue( couponDAO.isCouponOwned(1,1));
+        }
+        @Test
+        @DisplayName("if such coupon not owned, returns false")
+        public void ifSuchCouponNotOwnedReturnsTrue()
+        {
+            fillDefaultCompanies(2);
+            insertNotExpiredCouponToCouponTbl(1);
+            insertNotExpiredCouponToCouponTbl(2);
+            insertDfltCustomerToCustomerTbl();
+            insertCouponToCustomerId_CouponIdTbl(2, 1);
+            assertFalse( couponDAO.isCouponOwned(1,1));
+        }
 
+    }
 
 }

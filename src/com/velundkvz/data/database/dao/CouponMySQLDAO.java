@@ -3,19 +3,22 @@ package com.velundkvz.data.database.dao;
 import com.velundkvz.common.connection_pool.ConnectionPool;
 import com.velundkvz.common.connection_pool.DBConnections;
 import com.velundkvz.data.model.Coupon;
+import com.velundkvz.exceptions.CouponNotExistsInDBException;
+import com.velundkvz.exceptions.CustomerNotExistsInDBException;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.UNKNOWN_ID;
+import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.*;
 import static com.velundkvz.definitions.schema.CouponTbl.*;
 
 public class CouponMySQLDAO implements CouponDAO
 {
     private static final ConnectionPool adminCP = DBConnections.ADMIN_CONNECTIONS.getPool();
     @Override
-    public Coupon add(Coupon coupon)
+    public synchronized Coupon add(Coupon coupon)
     {
         Connection connection = adminCP.getConnection();
         long addedCouponId = 0;
@@ -123,11 +126,127 @@ public class CouponMySQLDAO implements CouponDAO
         return couponsList;
     }
 
+    public boolean isCouponOwned(long couponId, long customerId)
+    {
+        checkExistance(couponId, customerId);
+        Connection connection = adminCP.getConnection();
+        try
+        {
+            ResultSet rs = prepareGetIsOwnedStmt(couponId, customerId, connection).executeQuery();
+            if ( rs.next() )
+            {
+                if (rs.getInt(1) == 0)
+                {
+                    return false;
+                }
+                return true;
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        } finally
+        {
+            adminCP.put(connection);
+        }
+        return false;
+    }
+
+    public int getAmount(long couponId)
+    {
+        Connection connection = adminCP.getConnection();
+        try
+        {
+            ResultSet rs = prepareGetAmountStmt(couponId, connection).executeQuery();
+            if ( rs.next() )
+            {
+                return rs.getInt(1);
+            }else
+            {
+                throw new CouponNotExistsInDBException(NO_SUCH_COUPON_ID_IN_DB_EXC_FRMT_MSG.formatted(couponId));
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            return  0;
+        } finally
+        {
+            adminCP.put(connection);
+        }
+    }
+
+    public boolean isExists(long couponId)
+    {
+        Connection connection = adminCP.getConnection();
+        try
+        {
+            ResultSet rs = prepareIsCouponExistsByIDStmt(couponId, connection).executeQuery();
+            if ( rs.next() )
+            {
+                return rs.getInt(1) == 1;
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }finally
+        {
+            adminCP.put(connection);
+        }
+        return false;
+    }
+    public boolean updateCouponAmount(long couponId, int i)
+    {
+        Connection connection = adminCP.getConnection();
+        try
+        {
+           return prepareCouponUpdateAmountStmt( couponId, i, connection ).executeUpdate() > 0;
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            return false;
+        }finally
+        {
+            adminCP.put(connection);
+        }
+    }
 
     /* PRIVATES */
+    private PreparedStatement prepareIsCouponExistsByIDStmt(long couponId, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(GET_IS_COUPON_EXISTS_SQL, connection);
+        try {
+            ps.setLong(1, couponId);
+        } catch (SQLException e) {
+            throw new SQLException("bad parameters, "  + e.getMessage());
+        }
+        return ps;
+    }
     private PreparedStatement prepareGetAllCouponsStmt(Connection connection)
     {
         return initPreparedStmt(SELECT_ALL_COUPONS_SQL, connection);
+    }
+    private PreparedStatement prepareGetIsOwnedStmt(long couponId, long customerId, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(GET_IS_OWNED_COUPONS_SQL, connection);
+        try {
+            ps.setLong(1, couponId);
+            ps.setLong(2, customerId);
+        } catch (SQLException e) {
+            throw new SQLException("bad parameters, "  + e.getMessage());
+        }
+        return ps;
+    }
+    private PreparedStatement prepareGetAmountStmt(long couponId, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(GET_AMOUNT_SQL, connection);
+        try {
+            ps.setLong(1, couponId);
+
+        } catch (SQLException e) {
+            throw new SQLException("bad parameters, "  + e.getMessage());
+        }
+        return ps;
     }
     private PreparedStatement prepareGetAllByCustomerIdStmt(long customerId, Connection connection) throws SQLException
     {
@@ -190,6 +309,13 @@ public class CouponMySQLDAO implements CouponDAO
         }
         return ps;
     }
+    private PreparedStatement prepareCouponUpdateAmountStmt(long couponId, int amount, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(UPDATE_COUPON_AMOUNT_SQL, connection);
+        ps.setInt(1, amount);
+        ps.setLong(2, couponId);
+        return ps;
+    }
     private PreparedStatement initPreparedStmt(String sql, Connection connection)
     {
         PreparedStatement ps = null;
@@ -201,5 +327,17 @@ public class CouponMySQLDAO implements CouponDAO
             e.printStackTrace();
         }
         return ps;
+    }
+    private void checkExistance(long couponId, long customerId)
+    {
+        if (!isExists(couponId))
+        {
+            throw new CouponNotExistsInDBException(NO_SUCH_COUPON_ID_IN_DB_EXC_FRMT_MSG.formatted(couponId));
+        }
+
+        if ( ! (new CustomerMySQLDAO().isExists(customerId)) )
+        {
+            throw new CustomerNotExistsInDBException(NO_SUCH_CUSTOMER_ID_IN_DB_EXC_FRMT_MSG);
+        }
     }
 }

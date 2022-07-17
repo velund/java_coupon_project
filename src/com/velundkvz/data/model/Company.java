@@ -2,9 +2,6 @@ package com.velundkvz.data.model;
 
 import com.velundkvz.exceptions.InvalidCompanyBuildException;
 import com.velundkvz.exceptions.InvalidCompanyParametersException;
-
-import java.util.Objects;
-
 import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.INVALID_ID_EXC_MSG;
 
 public class Company

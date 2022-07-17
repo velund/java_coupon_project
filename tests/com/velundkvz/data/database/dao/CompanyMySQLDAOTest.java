@@ -1,18 +1,17 @@
 package com.velundkvz.data.database.dao;
 
-import com.velundkvz.data.model.Company;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
+import com.velundkvz.data.model.Company;
 import static com.velundkvz.data.DefaultModels.*;
 import static com.velundkvz.data.test_utils.Utils.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CompanyMySQLDAOTest
 {
@@ -362,8 +361,5 @@ class CompanyMySQLDAOTest
             assertEquals(x, companyDAO.getMaxId());
         }
     }
-
-
-
 
 }

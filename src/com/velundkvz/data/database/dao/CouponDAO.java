@@ -15,4 +15,6 @@ public interface CouponDAO
     boolean isCouponOwned(long couponId, long customerId);
     int getAmount(long couponId);
     boolean updateCouponAmount(long couponId, int i);
+    boolean isExists(long couponId);
+    boolean isExistsByCompanyIdAndTitle(long companyId, String title);
 }

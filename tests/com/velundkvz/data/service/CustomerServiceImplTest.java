@@ -4,7 +4,7 @@ import com.velundkvz.data.model.Coupon;
 import com.velundkvz.data.model.Customer;
 import com.velundkvz.exceptions.CouponNotExistsInDBException;
 import com.velundkvz.exceptions.CustomerEmailExistsException;
-import com.velundkvz.exceptions.CustomerPasswordTooWeakException;
+import com.velundkvz.exceptions.PasswordTooWeakException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -133,10 +133,10 @@ class CustomerServiceImplTest
             assertThrows(CustomerEmailExistsException.class, ()->custService.insert(test_dflt_cust_with_strong_password));
         }
         @Test
-        @DisplayName("with weak password, throws CustomerPasswordTooWeakException")
+        @DisplayName("with weak password, throws PasswordTooWeakException")
         public void withWeakPasswordThrowsCustomerPasswordTooWeakException()
         {
-            assertThrows(CustomerPasswordTooWeakException.class, ()->custService.insert(test_dflt_cust_with_weak_password));
+            assertThrows(PasswordTooWeakException.class, ()->custService.insert(test_dflt_cust_with_weak_password));
         }
 
     }
@@ -193,7 +193,7 @@ class CustomerServiceImplTest
     {
         @Test
         @DisplayName("password changed")
-        public void mailChanged()
+        public void passwordChanged()
         {
             insertDfltCustomerToCustomerTbl();
             assertEquals(dflt_strong_pswd_cust, getCustPassword(1));

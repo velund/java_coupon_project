@@ -76,6 +76,27 @@ public class CompanyMySQLDAO implements CompanyDAO
     }
 
     @Override
+    public boolean updatePassword(long id, String password)
+    {
+        Connection connection = companyCP.getConnection();
+        try
+        {
+            if ( prepareUpdateCompanyPasswordStatement(id, password, connection).executeUpdate() != 0)
+            {
+                return true;
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }finally
+        {
+            companyCP.put(connection);
+        }
+        return false;
+    }
+
+    @Override
     public Optional<Company> findById(long id)
     {
         Connection connection = companyCP.getConnection();
@@ -274,12 +295,21 @@ public class CompanyMySQLDAO implements CompanyDAO
     {
         return initPreparedStmt(SELECT_ALL_COMPANIES_SQL, connection);
     }
-    private PreparedStatement prepareUpdateCompanyEmailStatement(long id, String email, Connection connection) throws SQLException {
-    PreparedStatement ps = initPreparedStmt(UPDATE_COMPANY_EMAIL_BY_ID_SQL, connection);
-    ps.setString(1, email);
-    ps.setLong(2, id);
-    return ps;
-}
+    private PreparedStatement prepareUpdateCompanyEmailStatement(long id, String email, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(UPDATE_COMPANY_EMAIL_BY_ID_SQL, connection);
+        ps.setString(1, email);
+        ps.setLong(2, id);
+        return ps;
+    }
+    private PreparedStatement prepareUpdateCompanyPasswordStatement(long id, String email, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(UPDATE_COMPANY_PASSWORD_BY_ID_SQL, connection);
+        ps.setString(1, email);
+        ps.setLong(2, id);
+        return ps;
+    }
+
     private PreparedStatement prepareFindCompanyByEmailAndPswdStmt(String email, String password, Connection connection) throws SQLException {
         PreparedStatement ps = initPreparedStmt(SELECT_COMPANY_BY_EMAIL_AND_PSWD_SQL, connection);
         ps.setString(1, email);

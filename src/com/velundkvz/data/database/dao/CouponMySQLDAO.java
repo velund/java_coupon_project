@@ -9,7 +9,7 @@ import com.velundkvz.exceptions.CustomerNotExistsInDBException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.*;
 import static com.velundkvz.definitions.schema.CouponTbl.*;
@@ -210,13 +210,43 @@ public class CouponMySQLDAO implements CouponDAO
             adminCP.put(connection);
         }
     }
-
+    public boolean isExistsByCompanyIdAndTitle(long companyId, String title)
+    {
+        Connection connection = adminCP.getConnection();
+        try
+        {
+            ResultSet rs = prepareIsCouponExistsByCompanyIdAndTitle(companyId, title, connection).executeQuery();
+            if ( rs.next() )
+            {
+                return rs.getInt(1) == 1;
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }finally
+        {
+            adminCP.put(connection);
+        }
+        return false;
+    }
     /* PRIVATES */
     private PreparedStatement prepareIsCouponExistsByIDStmt(long couponId, Connection connection) throws SQLException
     {
         PreparedStatement ps = initPreparedStmt(GET_IS_COUPON_EXISTS_SQL, connection);
         try {
             ps.setLong(1, couponId);
+        } catch (SQLException e) {
+            throw new SQLException("bad parameters, "  + e.getMessage());
+        }
+        return ps;
+    }
+    private PreparedStatement prepareIsCouponExistsByCompanyIdAndTitle(long companyId, String title, Connection connection) throws SQLException
+    {
+        PreparedStatement ps = initPreparedStmt(GET_IS_COUPON_EXISTS_BY_COMP_ID_AND_TITLE_SQL, connection);
+        try {
+            ps.setLong(1, companyId);
+            ps.setString(2, title);
         } catch (SQLException e) {
             throw new SQLException("bad parameters, "  + e.getMessage());
         }

@@ -202,6 +202,37 @@ class CompanyMySQLDAOTest
         }
     }
     @Nested
+    @DisplayName("when Call updatePassword(): ")
+    class WhenCallUpdatePassword
+    {
+        private final String updatedMail = "updateted@mail.com";
+        @BeforeEach
+        private void prepareDB()
+        {
+            fillDefaultCompanies(2);
+        }
+        @Test
+        @DisplayName("if id exists returns true")
+        public void ifIdExistsReturnsTrue()
+        {
+            assertTrue( isCompanyPasswordExists(dflt_strong_pswd_comp) );
+            assertTrue( companyDAO.updatePassword(1, updated_strong_pswd_comp) );
+        }
+        @Test
+        @DisplayName("if id not exists returns false")
+        public void ifIdNotExistsReturnsFalse()
+        {
+            assertFalse( companyDAO.updatePassword(getMaxIdCompany() + 1, updatedMail) );
+        }
+        @Test
+        @DisplayName(" password updated ")
+        public void passwordUpdated()
+        {
+            companyDAO.updatePassword(1, updated_strong_pswd_comp);
+            assertTrue( isCompanyPasswordExists(updated_strong_pswd_comp) );
+        }
+    }
+    @Nested
     @DisplayName("when Call findById(): ")
     class WhenCallFindById
     {
@@ -234,7 +265,7 @@ class CompanyMySQLDAOTest
                 ()->assertEquals(1, company.getId()),
                 ()->assertEquals(dflt_name_comp, company.getName()),
                 ()->assertEquals(dflt_email_comp, company.getEmail()),
-                ()->assertEquals(dflt_pswd_comp, company.getPassword())
+                ()->assertEquals(dflt_strong_pswd_comp, company.getPassword())
             );
         }
     }
@@ -251,7 +282,7 @@ class CompanyMySQLDAOTest
         @DisplayName("if id exists - returns optional of company")
         public void ifIdExistsReturnsOptionalOfCompany()
         {
-            assertTrue(companyDAO.findByEmailAndPassword(dflt_email_comp, dflt_pswd_comp).isPresent());
+            assertTrue(companyDAO.findByEmailAndPassword(dflt_email_comp, dflt_strong_pswd_comp).isPresent());
         }
         @Test
         @DisplayName("if id NOT exists - returns optional of company")
@@ -263,14 +294,14 @@ class CompanyMySQLDAOTest
         @DisplayName("if id exists - returns optional of correct company")
         public void ifIdNOTExistsReturnsOptionalOfCorrectCompany()
         {
-            Optional<Company> optCompany = companyDAO.findByEmailAndPassword(dflt_email_comp, dflt_pswd_comp);
+            Optional<Company> optCompany = companyDAO.findByEmailAndPassword(dflt_email_comp, dflt_strong_pswd_comp);
             Company company = optCompany.orElse(null);
             assertAll
                     (
                             ()->assertNotNull(company),
                             ()->assertEquals(dflt_name_comp, company.getName()),
                             ()->assertEquals(dflt_email_comp, company.getEmail()),
-                            ()->assertEquals(dflt_pswd_comp, company.getPassword())
+                            ()->assertEquals(dflt_strong_pswd_comp, company.getPassword())
                     );
         }
     }

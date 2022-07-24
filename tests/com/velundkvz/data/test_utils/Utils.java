@@ -11,8 +11,7 @@ import static com.velundkvz.data.DefaultModels.*;
 import static com.velundkvz.definitions.ConnectionDefinitions.DB;
 import static com.velundkvz.definitions.ConnectionDefinitions.URL;
 import static com.velundkvz.definitions.schema.CompanyTbl.*;
-import static com.velundkvz.definitions.schema.CouponTbl.COL_AMOUNT_COUPON_TBL;
-import static com.velundkvz.definitions.schema.CouponTbl.COL_ID_COUPON_TBL;
+import static com.velundkvz.definitions.schema.CouponTbl.*;
 import static com.velundkvz.definitions.schema.DBSchema.*;
 import static com.velundkvz.definitions.schema.customerTbl.*;
 
@@ -131,7 +130,7 @@ public class Utils
     {
         try
         {
-            PreparedStatement ps = adminConnection.prepareStatement("insert into company(" + COL_NAME + "," + COL_PASSWORD + "," + COL_E_MAIL_COMPANY_TBL + ") values(?,?,?)");
+            PreparedStatement ps = adminConnection.prepareStatement("insert into company(" + COL_NAME + "," + COL_PASSWORD_COMPANY_TBL + "," + COL_E_MAIL_COMPANY_TBL + ") values(?,?,?)");
             ps.setString(1, name);
             ps.setString(2, pass);
             ps.setString(3, email);
@@ -265,7 +264,7 @@ public class Utils
         boolean isExists = false;
         try
         {
-            PreparedStatement ps =  adminConnection.prepareStatement("select exists (select " + COL_ID + " from " + COMPANY_TBL + " where " + COL_ID + " = ?)" );
+            PreparedStatement ps =  adminConnection.prepareStatement("select exists (select " + COL_ID_COMPANY_TBL + " from " + COMPANY_TBL + " where " + COL_ID_COMPANY_TBL + " = ?)" );
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next())
@@ -297,6 +296,68 @@ public class Utils
             return false;
         }
         return isExists;
+    }
+    public static boolean isCompanyPasswordExists(String password)
+    {
+        boolean isExists = false;
+        try
+        {
+            PreparedStatement ps =  adminConnection.prepareStatement("select exists (select " + COL_PASSWORD_COMPANY_TBL + " from " + COMPANY_TBL + " where " + COL_PASSWORD_COMPANY_TBL + " = ?)" );
+            ps.setString(1, password);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+            {
+                isExists = rs.getBoolean(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        return isExists;
+    }
+    /**
+     * if not found returns null
+     */
+    public static String getCompanyEmail(long id)
+    {
+        try
+        {
+            PreparedStatement ps =  adminConnection.prepareStatement("select " + COL_E_MAIL_COMPANY_TBL + " from " + COMPANY_TBL + " where " + COL_ID_COMPANY_TBL + " = ?" );
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+            {
+                return rs.getString(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
+    /**
+     * if not found returns null
+     */
+    public static String getCompanyPassword(long id)
+    {
+        try
+        {
+            PreparedStatement ps =  adminConnection.prepareStatement("select " + COL_PASSWORD_COMPANY_TBL + " from " + COMPANY_TBL + " where " + COL_ID_COMPANY_TBL + " = ?" );
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+            {
+                return rs.getString(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
     }
     public static long getMinIdCoupon()
     {
@@ -355,6 +416,41 @@ public class Utils
         try
         {
             ResultSet rs =  adminConnection.prepareStatement("select count(*) from coupon").executeQuery();
+            if (rs.next())
+            {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            count = -1;
+        }
+        return count;
+    }
+    public static long countCouponTbl(long companyId)
+    {
+        long count = 0;
+        try
+        {
+            ResultSet rs =  adminConnection.prepareStatement("select count(*) from "+COUPON_TBL+" where "+COL_COMPANY_ID_COUPON_TBL+" = %d".formatted(companyId)).executeQuery();
+            if (rs.next())
+            {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+            count = -1;
+        }
+        return count;
+    }
+    public static long countCouponTbl(long companyId, String title)
+    {
+        long count = 0;
+        String sql = ("select count(*) from "+COUPON_TBL+" where "+COL_COMPANY_ID_COUPON_TBL+" = %d and "+COL_TITLE_COUPON_TBL+" = '%s'").formatted(companyId, title);
+        try
+        {
+            ResultSet rs =  adminConnection.prepareStatement(sql).executeQuery();
             if (rs.next())
             {
                 count = rs.getInt(1);

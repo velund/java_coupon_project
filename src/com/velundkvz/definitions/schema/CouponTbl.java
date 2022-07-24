@@ -28,6 +28,9 @@ public final class CouponTbl
     public static final String GET_IS_COUPON_EXISTS_SQL = "select exists" +
             "(select "+COL_ID_COUPON_TBL+" from "+COUPON_TBL+" where "+COL_ID_COUPON_TBL+" = ?)";
 
+    public static final String GET_IS_COUPON_EXISTS_BY_COMP_ID_AND_TITLE_SQL = "select exists" +
+            "(select "+COL_ID_COUPON_TBL+" from "+COUPON_TBL+" where "+COL_COMPANY_ID_COUPON_TBL+" = ? and "+COL_TITLE_COUPON_TBL+" = ?)";
+
     public static final String GET_AMOUNT_SQL = "select "+ COL_AMOUNT_COUPON_TBL +" from "+COUPON_TBL+" where "+COL_ID_COUPON_TBL+" = ?";
 
     private static final String cust_cpns_cte_name = "coupons_of_customer";

@@ -10,6 +10,7 @@ public interface CompanyDAO
     void add(Company company);
     boolean remove(long id);
     boolean updateEmail(long id, String email);
+    boolean updatePassword(long id, String password);
     Optional<Company> findById(long id);
     List<Company> getAll();
     Optional<Company> findByEmailAndPassword(String email, String password);

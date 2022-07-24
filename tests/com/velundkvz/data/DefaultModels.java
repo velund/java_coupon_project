@@ -28,11 +28,15 @@ public class DefaultModels
 
     public static final String dflt_name_comp = "default_name";
     public static final String dflt_email_comp = "default_mail.com";
-    public static final String dflt_pswd_comp = "default_pswd";
+    public static final String updated_email_comp = "updated_mail_company.com";
+    public static final String dflt_strong_pswd_comp = "default_pswd_companyZ1";
+    public static final String dflt_weak_pswd_comp = "default_weak_pswd_company";
+    public static final String updated_strong_pswd_comp = "updated_strong_pswd_companyZ1";
 
-    public static final int category = 111;
-    public static final String title = "default_title";
-    public static final long price = 222;
+    public static final int dflt_category_coup = 111;
+    public static final String dflt_title_coup = "default_title";
+    public static final String new_title_coup = "new_title";
+    public static final long dflt_price_coup = 222;
     public static final int dflt_coupon_amount = 333;
     public static final String dflt_startDate_coup = "2022-07-03";
     public static final String dflt_not_expired_endDate_coup = "2022-12-30";
@@ -51,9 +55,9 @@ public class DefaultModels
     private static void createNotExpiredCoupon()
     {
         test_dflt_not_expired_coupon = new CouponBuilder()
-                .category(category)
-                .title(title)
-                .price(price)
+                .category(dflt_category_coup)
+                .title(dflt_title_coup)
+                .price(dflt_price_coup)
                 .amount(dflt_coupon_amount)
                 .start_date(Date.valueOf(dflt_startDate_coup))
                 .end_date(Date.valueOf(dflt_not_expired_endDate_coup))
@@ -62,9 +66,9 @@ public class DefaultModels
     private static void createExpiredCoupon()
     {
         test_dflt_expired_coupon = new CouponBuilder()
-                .category(category)
-                .title(title)
-                .price(price)
+                .category(dflt_category_coup)
+                .title(dflt_title_coup)
+                .price(dflt_price_coup)
                 .amount(dflt_coupon_amount)
                 .start_date(Date.valueOf(dflt_startDate_coup))
                 .end_date(Date.valueOf(dflt_expired_endDate_coup))
@@ -76,7 +80,7 @@ public class DefaultModels
         test_dflt_company = new CompanyBuilder()
                 .name(dflt_name_comp)
                 .email(dflt_email_comp)
-                .password(dflt_pswd_comp)
+                .password(dflt_strong_pswd_comp)
                 .build();
     }
     private static void createCustomerStrongPassword()

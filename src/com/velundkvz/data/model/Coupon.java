@@ -101,6 +101,10 @@ public class Coupon
     {
         this.company_id = company_id;
     }
+    public void settitle(String title)
+    {
+        this.title = title;
+    }
 
     public static class CouponBuilder
     {

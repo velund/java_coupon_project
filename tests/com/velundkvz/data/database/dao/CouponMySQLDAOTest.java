@@ -3,8 +3,7 @@ package com.velundkvz.data.database.dao;
 import com.velundkvz.data.model.Coupon;
 import com.velundkvz.data.test_utils.Utils;
 
-import static com.velundkvz.data.DefaultModels.dflt_coupon_amount;
-import static com.velundkvz.data.DefaultModels.test_dflt_not_expired_coupon;
+import static com.velundkvz.data.DefaultModels.*;
 import static com.velundkvz.data.test_utils.Utils.*;
 
 import com.velundkvz.exceptions.CouponNotExistsInDBException;
@@ -166,6 +165,7 @@ class CouponMySQLDAOTest {
             assertEquals(3, returnedList.size());
         }
     }
+
     @Nested
     @DisplayName("when Call getAmount(): ")
     class WhenCallGetAmount
@@ -238,6 +238,33 @@ class CouponMySQLDAOTest {
             assertFalse( couponDAO.isCouponOwned(1,1));
         }
 
+    }
+    @Nested
+    @DisplayName("when Call isExistsByCompanyIdAndTitle(companyId, title): ")
+    class WhenCallisExistsByCompanyIdAndTitle
+    {
+        @Test
+        @DisplayName("on empty, returns false")
+        public void onEmptyThenReturnsFalse()
+        {
+            assertFalse( couponDAO.isExistsByCompanyIdAndTitle(1, "fdsgfd") );
+        }
+        @Test
+        @DisplayName("on not empty, and with not existing title returns false")
+        public void onNotEmptyAndWithNotExistingTitleReturnsFalse()
+        {
+            insertDfltCompanyToCompanyTbl();
+            insertNotExpiredCouponToCouponTbl(1);
+            assertFalse( couponDAO.isExistsByCompanyIdAndTitle(1, "fdsgfd") );
+        }
+        @Test
+        @DisplayName("on not empty, and with existing title returns true")
+        public void onNotEmptyAndWithExistingTitleReturnsTrue()
+        {
+            insertDfltCompanyToCompanyTbl();
+            insertNotExpiredCouponToCouponTbl(1);
+            assertTrue( couponDAO.isExistsByCompanyIdAndTitle(1, dflt_title_coup) );
+        }
     }
 
 }

@@ -8,7 +8,7 @@ import com.velundkvz.data.model.Customer;
 import com.velundkvz.exceptions.CouponAmountZeroException;
 import com.velundkvz.exceptions.CouponOwnedByCustomerException;
 import com.velundkvz.exceptions.CustomerEmailExistsException;
-import com.velundkvz.exceptions.CustomerPasswordTooWeakException;
+import com.velundkvz.exceptions.PasswordTooWeakException;
 
 import java.util.Optional;
 
@@ -34,7 +34,7 @@ public class CustomerServiceImpl implements CustomerService
     }
 
     @Override
-    public synchronized long insert(Customer customer) throws CustomerEmailExistsException, CustomerPasswordTooWeakException
+    public synchronized long insert(Customer customer) throws CustomerEmailExistsException, PasswordTooWeakException
     {
         validate(customer);
         customerDAO.add(customer);
@@ -55,7 +55,7 @@ public class CustomerServiceImpl implements CustomerService
     }
 
     @Override
-    public void updatePassword(int id, String password) throws CustomerPasswordTooWeakException
+    public void updatePassword(int id, String password) throws PasswordTooWeakException
     {
         validateCustomerPassword(password);
         customerDAO.updatePassword(id, password);
@@ -71,6 +71,55 @@ public class CustomerServiceImpl implements CustomerService
         }
     }
 
+    /* PRIVATE */
+    private long getLastInsertedCustomerId()
+    {
+        return customerDAO.getMaxId();
+    }
+    private void validate(Customer customer)
+    {
+        validateCustomerPassword(customer.getPassword());
+        validateCustomerEmail(customer.getEmail());
+    }
+
+    private void validateCustomerPassword(String password)
+    {
+        if (tooShort(password) || !hasAtLeastOneDigit(password) ||
+                !hasAtLeastOneUpperCaseLetter(password) ||
+                !hasAtLeastOneLowerCaseLetter(password)
+        )
+        {
+            throw new PasswordTooWeakException(PASSWORD_TOO_WEAK_EXC_FORMAT_MSG.formatted(password));
+        }
+    }
+
+    private boolean hasAtLeastOneLowerCaseLetter(String str)
+    {
+        return str.matches(AT_LEAST_ONE_LOWER_CASE_LETTER_RGX);
+    }
+
+    private boolean hasAtLeastOneUpperCaseLetter(String str)
+    {
+        return str.matches(AT_LEAST_ONE_UPPER_CASE_LETTER_RGX);
+    }
+
+    private boolean hasAtLeastOneDigit(String str)
+    {
+        return str.matches(AT_LEAST_ONE_DIGIT_RGX);
+    }
+
+    private boolean tooShort(String str)
+    {
+        return str.length() < MIN_CUSTOMER_PSW_LENGTH;
+    }
+
+    private void validateCustomerEmail(String email)
+    {
+        if (customerDAO.isExists(email) )
+        {
+            throw new CustomerEmailExistsException(CUSTOMER_EMAIL_ALREDY_EXISTS_EXC_FORMAT_MSG.formatted(email));
+        }
+    }
     private void decreaseCouponAmount(long couponId)
     {
         couponDAO.updateCouponAmount(couponId, couponDAO.getAmount(couponId) - 1);
@@ -95,55 +144,6 @@ public class CustomerServiceImpl implements CustomerService
         if ( couponDAO.getAmount(couponId) <= 0 )
         {
             throw new CouponAmountZeroException(COUPON_AMOUNT_ZERO_EXC);
-        }
-    }
-
-    /* PRIVATE */
-    private long getLastInsertedCustomerId()
-    {
-        return customerDAO.getMaxId();
-    }
-    private void validate(Customer customer)
-    {
-        validateCustomerPassword(customer.getPassword());
-        validateCustomerEmail(customer.getEmail());
-    }
-
-    private void validateCustomerPassword(String password)
-    {
-        if (tooShort(password) || !hasAtLeastOneDigit(password) ||
-                !hasAtLeastOneUpperCaseLetter(password) ||
-                !hasAtLeastOneLowerCaseLetter(password)
-        )
-        {
-            throw new CustomerPasswordTooWeakException(CUSTOMER_PASSWORD_TOO_WEAK_EXC_FORMAT_MSG.formatted(password));
-        }
-    }
-
-    private boolean hasAtLeastOneLowerCaseLetter(String str)
-    {
-        return str.matches(AT_LEAST_ONE_LOWER_CASE_LETTER_RGX);
-    }
-
-    private boolean hasAtLeastOneUpperCaseLetter(String str)
-    {
-        return str.matches(AT_LEAST_ONE_UPPER_CASE_LETTER_RGX);
-    }
-    private boolean hasAtLeastOneDigit(String str)
-    {
-        return str.matches(AT_LEAST_ONE_DIGIT_RGX);
-    }
-
-    private boolean tooShort(String str)
-    {
-        return str.length() < MIN_CUSTOMER_PSW_LENGTH;
-    }
-
-    private void validateCustomerEmail(String email)
-    {
-        if (customerDAO.isExists(email) )
-        {
-            throw new CustomerEmailExistsException(CUSTOMER_EMAIL_ALREDY_EXISTS_EXC_FORMAT_MSG.formatted(email));
         }
     }
 }

@@ -1,8 +1,8 @@
 package com.velundkvz.data.service;
 
-import com.velundkvz.data.model.Customer;
-
 import java.util.Optional;
+
+import com.velundkvz.data.model.Customer;
 
 public interface CustomerService
 {

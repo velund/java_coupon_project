@@ -42,6 +42,9 @@ public class DefaultModels
     public static final String dflt_not_expired_endDate_coup = "2022-12-30";
     public static final String dflt_expired_endDate_coup = "2022-05-28";
 
+    public static final Date far_future_date = Date.valueOf("2100-12-30");
+    public static final Date far_past_date = new Date(0);
+
 
     static
     {

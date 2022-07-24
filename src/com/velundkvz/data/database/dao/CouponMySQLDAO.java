@@ -1,16 +1,14 @@
 package com.velundkvz.data.database.dao;
 
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.velundkvz.common.connection_pool.ConnectionPool;
 import com.velundkvz.common.connection_pool.DBConnections;
 import com.velundkvz.data.model.Coupon;
 import com.velundkvz.exceptions.CouponNotExistsInDBException;
 import com.velundkvz.exceptions.CustomerNotExistsInDBException;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
-
 import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.*;
 import static com.velundkvz.definitions.schema.CouponTbl.*;
 
@@ -85,23 +83,7 @@ public class CouponMySQLDAO implements CouponDAO
     @Override
     public List<Coupon> getAllExpired()
     {
-        List<Coupon> couponsList = new ArrayList<>();
-        Connection connection = adminCP.getConnection();
-        try
-        {
-            ResultSet rs = prepareGetAllBeforeStmt(new Date(System.currentTimeMillis()), connection).executeQuery();
-            while ( rs.next() )
-            {
-                couponsList.add(createCouponByFullParameters(rs));
-            }
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-        } finally
-        {
-            adminCP.put(connection);
-        }
-        return couponsList;
+        return getAllBefore( new Date(System.currentTimeMillis()) );
     }
 
     @Override

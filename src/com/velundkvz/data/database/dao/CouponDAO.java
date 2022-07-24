@@ -1,9 +1,10 @@
 package com.velundkvz.data.database.dao;
 
-import com.velundkvz.data.model.Coupon;
 
 import java.sql.Date;
 import java.util.List;
+
+import com.velundkvz.data.model.Coupon;
 
 public interface CouponDAO
 {

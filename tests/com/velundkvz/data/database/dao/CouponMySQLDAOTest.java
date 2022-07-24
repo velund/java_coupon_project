@@ -10,6 +10,7 @@ import com.velundkvz.exceptions.CouponNotExistsInDBException;
 import com.velundkvz.exceptions.CustomerNotExistsInDBException;
 import org.junit.jupiter.api.*;
 
+import java.sql.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -165,7 +166,35 @@ class CouponMySQLDAOTest {
             assertEquals(3, returnedList.size());
         }
     }
-
+    @Nested
+    @DisplayName("when Call getAllBefore(date): ")
+    class WhenCallGetAllBefore
+    {
+        @Test
+        @DisplayName("then if no coupons before date, then  get empty list")
+        public void ThenGetEmptyListIfNoCoupons()
+        {
+            fillNotExpiredCoupons(3);
+            assertEquals(0,  couponDAO.getAllBefore(far_past_date).size() );
+        }
+        @Test
+        @DisplayName("then if 3 coupons before DefaultModels.far_future_date, then get list of 3")
+        public void andOnly3ExpiredThenGetListOf3()
+        {
+            fillExpiredCoupons(3);
+            List<Coupon> returnedList = couponDAO.getAllBefore(far_future_date);
+            assertEquals(3, returnedList.size());
+        }
+        @Test
+        @DisplayName("then if 3 expired coupons, among 6, then get list of 3")
+        public void and3Expiredamong6ThenGetListOf3()
+        {
+            fillExpiredCoupons(3);
+            fillNotExpiredCoupons(3);
+            List<Coupon> returnedList = couponDAO.getAllBefore(Date.valueOf(dflt_not_expired_endDate_coup));
+            assertEquals(3, returnedList.size());
+        }
+    }
     @Nested
     @DisplayName("when Call getAmount(): ")
     class WhenCallGetAmount

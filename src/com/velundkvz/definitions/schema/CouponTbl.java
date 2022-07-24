@@ -42,11 +42,11 @@ public final class CouponTbl
                                     + COUPON_TBL
                                     + " join " + cust_cpns_cte_name + " on " + COUPON_TBL +"." + COL_ID_COUPON_TBL + " = "
                                      + cust_cpns_cte_name + "." + COL_COUPON_ID_COUP_CUST_TBL;
+    public static final String GET_ALL_LESS_THAN_DATE_SQL = "select * from coupon where " + COL_END_DATE_COUPON_TBL + " < ?";
+
     private CouponTbl()
     {
         throw new AssertionError("constants container not for implementing");
     }
-
-    public static final String GET_ALL_LESS_THAN_DATE_SQL = "select * from coupon where " + COL_END_DATE_COUPON_TBL + " < ?";
 
 }

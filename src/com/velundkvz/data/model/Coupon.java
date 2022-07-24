@@ -5,7 +5,6 @@ import java.sql.Date;
 
 import com.velundkvz.exceptions.InvalidCouponBuildException;
 import com.velundkvz.exceptions.InvalidCouponParametersException;
-
 import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.*;
 
 public class Coupon

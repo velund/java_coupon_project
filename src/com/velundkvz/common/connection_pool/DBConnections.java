@@ -1,7 +1,5 @@
 package com.velundkvz.common.connection_pool;
 
-
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,8 +9,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import static com.velundkvz.definitions.ConnectionDefinitions.*;
-
-import com.velundkvz.common.connection_pool.ConnectionPool;
 import com.velundkvz.exceptions.BadTypeConnectionException;
 import com.velundkvz.exceptions.PoolNotExistsException;
 

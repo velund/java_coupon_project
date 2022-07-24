@@ -1,10 +1,9 @@
 package com.velundkvz.data.model;
 
-import com.velundkvz.exceptions.InvalidCustomerBuildException;
-import com.velundkvz.exceptions.InvalidCustomerParametersException;
-
 import java.util.List;
 
+import com.velundkvz.exceptions.InvalidCustomerBuildException;
+import com.velundkvz.exceptions.InvalidCustomerParametersException;
 import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.INVALID_ID_EXC_MSG;
 
 public class Customer

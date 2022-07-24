@@ -1,9 +1,5 @@
 package com.velundkvz.data.database.dao;
 
-import com.velundkvz.common.connection_pool.ConnectionPool;
-import com.velundkvz.common.connection_pool.DBConnections;
-import com.velundkvz.data.model.Customer;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.velundkvz.common.connection_pool.ConnectionPool;
+import com.velundkvz.common.connection_pool.DBConnections;
+import com.velundkvz.data.model.Customer;
 import static com.velundkvz.definitions.schema.customerTbl.*;
 
 public class CustomerMySQLDAO implements CustomerDAO

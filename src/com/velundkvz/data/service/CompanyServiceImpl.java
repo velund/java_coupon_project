@@ -1,5 +1,7 @@
 package com.velundkvz.data.service;
 
+import java.util.Optional;
+
 import com.velundkvz.data.database.dao.CompanyDAO;
 import com.velundkvz.data.database.dao.CompanyMySQLDAO;
 import com.velundkvz.data.database.dao.CouponDAO;
@@ -10,9 +12,6 @@ import com.velundkvz.exceptions.CompanyEmailExistsException;
 import com.velundkvz.exceptions.CompanyNotExistsException;
 import com.velundkvz.exceptions.CouponAlreadyExistsException;
 import com.velundkvz.exceptions.PasswordTooWeakException;
-
-import java.util.Optional;
-
 import static com.velundkvz.definitions.modelDefinitions.ModelsDefinitions.PASSWORD_TOO_WEAK_EXC_FORMAT_MSG;
 import static com.velundkvz.definitions.serviceDefinitions.ServiceDefinitions.*;
 import static com.velundkvz.definitions.serviceDefinitions.ServiceDefinitions.MIN_CUSTOMER_PSW_LENGTH;
